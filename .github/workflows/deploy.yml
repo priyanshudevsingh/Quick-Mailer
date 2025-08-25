@@ -77,6 +77,10 @@ jobs:
         echo "🚀 Starting deployment to AWS Lambda..."
         echo "📋 Environment: ${{ env.NODE_VERSION }} | ${{ env.AWS_REGION }}"
         
+        # Set deployment timestamp to force deployment
+        export DEPLOYMENT_TIMESTAMP=$(date +%s)
+        echo "🕐 Deployment timestamp: $DEPLOYMENT_TIMESTAMP"
+        
         # Deploy to Lambda
         serverless deploy --stage prod --verbose
         
@@ -98,6 +102,7 @@ jobs:
         GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
         FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
         S3_BUCKET: ${{ secrets.S3_BUCKET }}
+        DEPLOYMENT_TIMESTAMP: ${{ github.run_id }}
 
     - name: Deployment Summary
       run: |

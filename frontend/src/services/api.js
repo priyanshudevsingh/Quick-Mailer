@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 // Support both local development and production serverless deployment
+// Updated for serverless deployment with proper /api prefix
 const getApiBaseUrl = () => {
   // Check for Vercel environment
   if (import.meta.env.VITE_VERCEL_ENV === 'production') {

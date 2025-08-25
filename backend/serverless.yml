@@ -1,6 +1,5 @@
 service: quick-mailer-api
-# Updated: Force new deployment with CORS and route fixes
-description: Quick Mailer API with proper CORS and route handling
+# Force deployment on every push with timestamp-based versioning
 
 frameworkVersion: '3'
 
@@ -64,3 +63,5 @@ custom:
   serverless-offline:
     httpPort: 3000
     noPrependStageInUrl: true
+  # This will change on every deployment, forcing Serverless to deploy
+  deploymentTimestamp: ${env:DEPLOYMENT_TIMESTAMP, 'manual-deploy'}
