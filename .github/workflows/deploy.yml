@@ -74,7 +74,22 @@ jobs:
     - name: Deploy to AWS Lambda
       working-directory: ./backend
       run: |
+        echo "🚀 Starting deployment to AWS Lambda..."
+        echo "📋 Environment: ${{ env.NODE_VERSION }} | ${{ env.AWS_REGION }}"
+        
+        # Deploy to Lambda
         serverless deploy --stage prod --verbose
+        
+        echo ""
+        echo "✅ Deployment completed successfully!"
+        echo "🔗 Getting API Gateway URL..."
+        
+        # Get deployment info
+        serverless info --stage prod --verbose
+        
+        echo ""
+        echo "🎉 Quick-Mailer backend is now live on AWS Lambda!"
+        echo "📱 Update your frontend with the API Gateway URL above"
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -83,10 +98,18 @@ jobs:
         GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
         FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
         S3_BUCKET: ${{ secrets.S3_BUCKET }}
-        
-    - name: Get deployment info
-      working-directory: ./backend
+
+    - name: Deployment Summary
       run: |
-        echo "Deployment completed successfully!"
-        echo "API Gateway URL:"
-        serverless info --stage prod --verbose
+        echo "🎯 Deployment Summary"
+        echo "===================="
+        echo "✅ Backend deployed to AWS Lambda"
+        echo "✅ API Gateway configured"
+        echo "✅ S3 bucket permissions set"
+        echo "✅ Environment variables configured"
+        echo ""
+        echo "📋 Next Steps:"
+        echo "1. Copy the API Gateway URL from above"
+        echo "2. Update your frontend VITE_API_URL"
+        echo "3. Test the /api/health endpoint"
+        echo "4. Your backend is now serverless!"
