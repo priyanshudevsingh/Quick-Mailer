@@ -62,7 +62,7 @@ https://[api-id].execute-api.us-east-1.amazonaws.com/prod/api/
 
 Update your Vercel frontend with:
 ```bash
-VITE_API_URL=https://your-api-gateway-url.amazonaws.com/prod/api
+VITE_API_URL=https://your-api-gateway-url.amazonaws.com/prod
 ```
 
 ## 🆘 Need Help?

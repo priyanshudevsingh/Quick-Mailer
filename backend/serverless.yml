@@ -41,7 +41,10 @@ functions:
     handler: src/lambda.handler
     events:
       - httpApi:
-          path: /{proxy+}
+          path: /api/{proxy+}
+          method: ANY
+      - httpApi:
+          path: /api
           method: ANY
       - httpApi:
           path: /
