@@ -52,6 +52,33 @@ app.use('/api/attachments', attachmentRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/stats', statisticsRoutes);
 
+// Database sync endpoint (for development/setup only)
+app.get('/api/db/sync', async (req, res) => {
+  try {
+    const { forceSyncDatabase } = require('./shared/database');
+    const result = await forceSyncDatabase();
+    
+    if (result.success) {
+      res.json({ 
+        success: true, 
+        message: result.message,
+        warning: 'This endpoint should only be used for initial setup!'
+      });
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        error: result.error 
+      });
+    }
+  } catch (error) {
+    console.error('Database sync endpoint error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Database sync failed' 
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({

@@ -44,6 +44,31 @@ const syncDatabase = async (options = { alter: true }) => {
 };
 
 /**
+ * Force sync database - creates all tables (WARNING: DESTROYS EXISTING DATA)
+ * Use this only for initial setup or when you want to reset everything
+ */
+const forceSyncDatabase = async () => {
+  try {
+    console.log('🔄 Force syncing database...');
+    
+    // Import all models to ensure they're registered with Sequelize
+    require('../../features/auth/models/User');
+    require('../../features/templates/models/Template');
+    require('../../features/email/models/Email');
+    require('../../features/attachments/models/Attachment');
+    
+    // Force sync with alter: true to create tables
+    await sequelize.sync({ force: true, alter: true });
+    
+    console.log('✅ Database tables created successfully!');
+    return { success: true, message: 'Database tables created successfully!' };
+  } catch (error) {
+    console.error('❌ Force sync failed:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
  * Close database connection
  */
 const closeConnection = async () => {
@@ -59,5 +84,6 @@ module.exports = {
   sequelize,
   testConnection,
   syncDatabase,
-  closeConnection,
+  forceSyncDatabase,
+  closeConnection
 };
