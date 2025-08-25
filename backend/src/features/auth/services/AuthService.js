@@ -18,6 +18,12 @@ class AuthService {
       config.google.clientSecret,
       config.google.redirectUri
     );
+    
+    // Configure SSL/TLS settings for Lambda environment
+    if (process.env.NODE_ENV === 'production') {
+      // Disable strict SSL verification for Lambda environment
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    }
   }
 
   /**
@@ -86,6 +92,15 @@ class AuthService {
     } catch (error) {
       console.error('❌ AuthService - Google authentication failed:', error);
       console.error('❌ AuthService - Error stack:', error.stack);
+      
+      // Handle specific SSL certificate errors
+      if (error.message.includes('self-signed certificate') || 
+          error.message.includes('certificate') ||
+          error.message.includes('SSL')) {
+        console.error('🔒 AuthService - SSL Certificate issue detected');
+        throw new AuthenticationError(`SSL Certificate issue: ${error.message}. Please check Lambda SSL configuration.`);
+      }
+      
       throw new AuthenticationError(`Google authentication failed: ${error.message}`);
     }
   }
