@@ -28,9 +28,20 @@ module.exports.handler = serverless(app, {
   response: {
     // Ensure proper CORS headers
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://quick-mailer-seven.vercel.app',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Credentials': 'true'
     }
+  },
+  // Add request logging for debugging
+  request: (req, event, context) => {
+    console.log('🔍 Lambda Request:', {
+      path: req.path,
+      method: req.method,
+      url: req.url,
+      headers: req.headers
+    });
+    return req;
   }
 });
