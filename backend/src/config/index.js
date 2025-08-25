@@ -25,7 +25,8 @@ const config = {
       idle: 10000
     },
     dialectOptions: {
-      ssl: process.env.NODE_ENV === 'production' ? {
+      // Force SSL for production and when DATABASE_URL contains 'aivencloud.com'
+      ssl: (process.env.NODE_ENV === 'production' || process.env.DATABASE_URL?.includes('aivencloud.com')) ? {
         require: true,
         rejectUnauthorized: false
       } : false
