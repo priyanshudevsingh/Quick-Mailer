@@ -9,11 +9,8 @@ const Statistics = sequelize.define('Statistics', {
   },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Users',
-      key: 'id'
-    }
+    allowNull: false
+    // Foreign key reference will be added after tables exist
   },
   emailsSent: {
     type: DataTypes.INTEGER,

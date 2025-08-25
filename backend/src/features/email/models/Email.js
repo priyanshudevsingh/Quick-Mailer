@@ -9,11 +9,8 @@ const Email = sequelize.define('Email', {
   },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'Users',
-      key: 'id'
-    }
+    allowNull: false
+    // Foreign key reference will be added after tables exist
   },
   to: {
     type: DataTypes.TEXT,
