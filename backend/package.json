@@ -6,14 +6,21 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm ci --only=production",
+    "deploy": "serverless deploy --stage prod",
+    "deploy:dev": "serverless deploy --stage dev",
+    "remove": "serverless remove --stage prod",
+    "logs": "serverless logs --stage prod"
   },
   "keywords": [
     "email",
     "templates",
     "google-oauth",
     "nodejs",
-    "express"
+    "express",
+    "serverless",
+    "aws-lambda"
   ],
   "author": "",
   "license": "ISC",
@@ -32,9 +39,13 @@
     "pg": "^8.11.3",
     "sequelize": "^6.35.0",
     "sequelize-cli": "^6.6.2",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "serverless-http": "^3.2.0",
+    "aws-sdk": "^2.1531.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "serverless": "^3.38.0",
+    "serverless-offline": "^13.3.3"
   }
 }

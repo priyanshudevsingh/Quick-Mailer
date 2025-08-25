@@ -100,11 +100,13 @@ Attachments (id, userId, originalName, filename, path, size)
 ✅ PostgreSQL 12+ (with database permissions)
 ✅ Google Cloud Console account (for OAuth & Gmail API)
 ✅ Gmail account (for testing email functionality)
-```
+✅ AWS Account (for serverless deployment)
+✅ GitHub repository (for CI/CD)
 
 ## 🚀 Quick Start Guide
 
-### **1️⃣ Clone & Install**
+### **🚀 Option 1: Traditional Deployment (Local/Server)**
+#### **1️⃣ Clone & Install**
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -163,6 +165,25 @@ npm run dev
 3. ✅ Grant Gmail permissions
 4. 🎉 Welcome to your Email Dashboard!
 ```
+
+### **☁️ Option 2: Serverless Deployment (AWS Lambda) - Recommended**
+```bash
+# Quick serverless deployment
+cd backend
+npm install
+./scripts/setup-aws.sh
+cp env.serverless.example .env
+# Edit .env with your credentials
+npm run deploy
+
+# Frontend (Vercel)
+cd ../frontend
+npm install
+npm run build
+# Deploy to Vercel with environment variables
+```
+
+**🚀 For detailed serverless setup, see [QUICK_START.md](QUICK_START.md)**
 
 ## 💡 User Guide & Workflows
 
