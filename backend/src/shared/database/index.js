@@ -56,6 +56,7 @@ const forceSyncDatabase = async () => {
     require('../../features/templates/models/Template');
     require('../../features/email/models/Email');
     require('../../features/attachments/models/Attachment');
+    require('../../features/statistics/models/Statistics');
     
     // Force sync with alter: true to create tables
     await sequelize.sync({ force: true, alter: true });
