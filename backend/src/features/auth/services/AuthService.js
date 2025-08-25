@@ -49,15 +49,23 @@ class AuthService {
     }
 
     try {
+      console.log('🔄 AuthService - Starting Google OAuth callback processing');
+      
       // Exchange code for tokens
+      console.log('🔄 AuthService - Exchanging code for tokens...');
       const { tokens } = await this.client.getToken(code);
+      console.log('✅ AuthService - Tokens received:', !!tokens.access_token);
+      
       this.client.setCredentials(tokens);
 
       // Get user info
+      console.log('🔄 AuthService - Getting user info from Google...');
       const oauth2 = google.oauth2({ version: 'v2', auth: this.client });
       const { data: userInfo } = await oauth2.userinfo.get();
+      console.log('✅ AuthService - User info received:', userInfo.email);
 
       // Find or create user
+      console.log('🔄 AuthService - Finding or creating user...');
       const user = await this.findOrCreateUser({
         googleId: userInfo.id,
         email: userInfo.email,
@@ -67,13 +75,18 @@ class AuthService {
         refreshToken: tokens.refresh_token,
         tokenExpiry: tokens.expiry_date ? new Date(tokens.expiry_date) : null
       });
+      console.log('✅ AuthService - User processed:', user.id);
 
       // Generate JWT token
+      console.log('🔄 AuthService - Generating JWT token...');
       const token = this.generateToken(user.id);
+      console.log('✅ AuthService - JWT token generated');
 
       return { user, token };
     } catch (error) {
-      throw new AuthenticationError('Google authentication failed');
+      console.error('❌ AuthService - Google authentication failed:', error);
+      console.error('❌ AuthService - Error stack:', error.stack);
+      throw new AuthenticationError(`Google authentication failed: ${error.message}`);
     }
   }
 
