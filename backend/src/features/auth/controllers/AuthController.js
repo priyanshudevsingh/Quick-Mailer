@@ -28,13 +28,39 @@ class AuthController {
    * GET /auth/google/callback
    */
   googleCallback = asyncHandler(async (req, res) => {
-    const { code } = req.query;
-    const { user, token } = await this.authService.handleGoogleCallback(code);
-    
-    const frontendUrl = config.server.frontendUrl;
-    const redirectUrl = `${frontendUrl}/auth-callback?token=${token}&success=true`;
-    
-    res.redirect(redirectUrl);
+    try {
+      console.log('🔍 Google Callback - Code received:', req.query.code ? 'YES' : 'NO');
+      console.log('🔍 Google Callback - Query params:', req.query);
+      
+      const { code } = req.query;
+      
+      if (!code) {
+        console.error('❌ Google Callback - No authorization code received');
+        return res.status(400).json({ error: 'No authorization code received' });
+      }
+      
+      console.log('🔄 Google Callback - Processing with code:', code.substring(0, 20) + '...');
+      
+      const { user, token } = await this.authService.handleGoogleCallback(code);
+      
+      console.log('✅ Google Callback - Success, user ID:', user?.id);
+      
+      const frontendUrl = config.server.frontendUrl;
+      const redirectUrl = `${frontendUrl}/auth-callback?token=${token}&success=true`;
+      
+      console.log('🔄 Google Callback - Redirecting to:', redirectUrl);
+      res.redirect(redirectUrl);
+      
+    } catch (error) {
+      console.error('❌ Google Callback - Error:', error);
+      console.error('❌ Google Callback - Stack:', error.stack);
+      
+      // Return error instead of throwing
+      res.status(500).json({ 
+        error: 'Authentication failed', 
+        details: error.message 
+      });
+    }
   });
 
   /**
