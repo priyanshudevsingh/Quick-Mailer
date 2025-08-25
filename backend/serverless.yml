@@ -1,4 +1,6 @@
 service: quick-mailer-api
+# Updated: Force new deployment with CORS and route fixes
+description: Quick Mailer API with proper CORS and route handling
 
 frameworkVersion: '3'
 
