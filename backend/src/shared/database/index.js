@@ -52,13 +52,48 @@ const forceSyncDatabase = async () => {
     console.log('🔄 Force syncing database...');
     
     // Import all models to ensure they're registered with Sequelize
-    require('../../features/auth/models/User');
-    require('../../features/templates/models/Template');
-    require('../../features/email/models/Email');
-    require('../../features/attachments/models/Attachment');
-    require('../../features/statistics/models/Statistics');
+    try {
+      require('../../features/auth/models/User');
+      console.log('✅ User model loaded');
+    } catch (error) {
+      console.error('❌ Failed to load User model:', error.message);
+      return { success: false, error: `User model load failed: ${error.message}` };
+    }
+    
+    try {
+      require('../../features/templates/models/Template');
+      console.log('✅ Template model loaded');
+    } catch (error) {
+      console.error('❌ Failed to load Template model:', error.message);
+      return { success: false, error: `Template model load failed: ${error.message}` };
+    }
+    
+    try {
+      require('../../features/email/models/Email');
+      console.log('✅ Email model loaded');
+    } catch (error) {
+      console.error('❌ Failed to load Email model:', error.message);
+      return { success: false, error: `Email model load failed: ${error.message}` };
+    }
+    
+    try {
+      require('../../features/attachments/models/Attachment');
+      console.log('✅ Attachment model loaded');
+    } catch (error) {
+      console.error('❌ Failed to load Attachment model:', error.message);
+      return { success: false, error: `Attachment model load failed: ${error.message}` };
+    }
+    
+    try {
+      require('../../features/statistics/models/Statistics');
+      console.log('✅ Statistics model loaded');
+    } catch (error) {
+      console.error('❌ Failed to load Statistics model:', error.message);
+      return { success: false, error: `Statistics model load failed: ${error.message}` };
+    }
     
     // Force sync with alter: true to create tables
+    console.log('🔄 Starting database sync...');
     await sequelize.sync({ force: true, alter: true });
     
     console.log('✅ Database tables created successfully!');

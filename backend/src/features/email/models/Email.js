@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../../../shared/database');
+const { DB_TABLES } = require('../../../common/constants');
 
 const Email = sequelize.define('Email', {
   id: {
@@ -49,7 +50,7 @@ const Email = sequelize.define('Email', {
     defaultValue: {}
   }
 }, {
-  tableName: 'emails',
+  tableName: DB_TABLES.EMAILS,
   timestamps: true,
   underscored: true
 });

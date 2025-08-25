@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../../../shared/database');
+const { DB_TABLES } = require('../../../common/constants');
 
 const Statistics = sequelize.define('Statistics', {
   id: {
@@ -33,7 +34,7 @@ const Statistics = sequelize.define('Statistics', {
     defaultValue: DataTypes.NOW
   }
 }, {
-  tableName: 'statistics',
+  tableName: DB_TABLES.STATISTICS,
   timestamps: true,
   underscored: true
 });

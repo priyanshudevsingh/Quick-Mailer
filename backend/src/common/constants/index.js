@@ -88,6 +88,8 @@ const DB_TABLES = {
   USERS: 'users',
   TEMPLATES: 'templates',
   ATTACHMENTS: 'attachments',
+  EMAILS: 'emails',
+  STATISTICS: 'statistics'
 };
 
 module.exports = {

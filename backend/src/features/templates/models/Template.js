@@ -15,11 +15,8 @@ const Template = sequelize.define('Template', {
   },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: DB_TABLES.USERS,
-      key: 'id'
-    }
+    allowNull: false
+    // Foreign key reference will be added after tables exist
   },
   name: {
     type: DataTypes.STRING,

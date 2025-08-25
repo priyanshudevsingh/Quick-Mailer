@@ -22,8 +22,15 @@ const authenticateToken = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Import User model dynamically to avoid circular dependency
-    const User = require('../../features/auth/models/User');
+    // Lazy load User model to avoid circular dependency
+    let User;
+    try {
+      User = require('../../features/auth/models/User');
+    } catch (error) {
+      console.error('Failed to load User model:', error);
+      return ResponseUtils.error(res, 'Authentication service unavailable', 503);
+    }
+    
     const user = await User.findByPk(decoded.userId);
     
     if (!user) {

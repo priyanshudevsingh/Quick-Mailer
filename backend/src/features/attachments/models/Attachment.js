@@ -15,11 +15,8 @@ const Attachment = sequelize.define('Attachment', {
   },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: DB_TABLES.USERS,
-      key: 'id'
-    }
+    allowNull: false
+    // Foreign key reference will be added after tables exist
   },
   originalName: {
     type: DataTypes.STRING,
@@ -50,7 +47,7 @@ const Attachment = sequelize.define('Attachment', {
     defaultValue: true
   }
 }, {
-  tableName: 'attachments',
+  tableName: DB_TABLES.ATTACHMENTS,
   timestamps: true,
   indexes: [
     {
