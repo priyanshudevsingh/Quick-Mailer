@@ -118,7 +118,7 @@ class AttachmentService {
   async getAttachmentForDownload(attachmentId, userId) {
     const attachment = await this.getAttachmentById(attachmentId, userId);
 
-    // Check if file exists using the full path stored in database
+    // Check if file exists using the storage service
     try {
       await this.storageService.getFile(attachment.path);
     } catch (error) {

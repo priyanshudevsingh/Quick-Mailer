@@ -77,6 +77,7 @@ class EmailController {
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="mass-email-template-${templateId}.xlsx"`);
     
+    // Send buffer directly instead of using sendFile
     res.send(excelBuffer);
   });
 

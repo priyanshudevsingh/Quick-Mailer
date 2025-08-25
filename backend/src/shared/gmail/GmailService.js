@@ -9,6 +9,7 @@ const path = require('path');
 const { AppError } = require('../../common/errors/AppError');
 const { ERROR_MESSAGES } = require('../../common/constants');
 const { cleanHtmlForEmail } = require('../../common/utils/emailUtils');
+const { StorageService } = require('../storage/StorageService');
 
 class GmailService {
   constructor(accessToken) {
@@ -84,8 +85,19 @@ class GmailService {
       // Add attachments
       for (const attachment of attachments) {
         try {
-          const filePath = path.join(__dirname, '../../../uploads', attachment.filename);
-          const fileContent = await fs.readFile(filePath);
+          let fileContent;
+          
+          // Handle both local and S3 storage
+          if (attachment.path && attachment.path.includes('s3.amazonaws.com')) {
+            // S3 storage - download file content
+            const storageService = new StorageService();
+            fileContent = await storageService.getFile(attachment.path);
+          } else {
+            // Local storage - read from filesystem
+            const filePath = path.join(__dirname, '../../../uploads', attachment.filename);
+            fileContent = await fs.readFile(filePath);
+          }
+          
           const base64Content = fileContent.toString('base64');
           
           email += [

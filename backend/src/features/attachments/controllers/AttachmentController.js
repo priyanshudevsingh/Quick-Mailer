@@ -88,13 +88,25 @@ class AttachmentController {
     res.setHeader('Content-Disposition', `attachment; filename="${attachment.originalName}"`);
     res.setHeader('Content-Type', attachment.mimetype);
     
-    // Resolve the full path - if it's already absolute, use it; otherwise make it relative to process.cwd()
-    const fullPath = path.isAbsolute(filePath) ? filePath : path.resolve(process.cwd(), filePath);
-    
-    console.log(`📥 Downloading file: ${attachment.originalName} from ${fullPath}`);
-    
-    // Send the file
-    res.sendFile(fullPath);
+    // Handle S3 vs local storage
+    if (filePath && filePath.includes('s3.amazonaws.com')) {
+      // S3 storage - redirect to presigned URL or stream content
+      const { StorageService } = require('../../../shared/storage/StorageService');
+      const storageService = new StorageService();
+      
+      try {
+        const fileContent = await storageService.getFile(filePath);
+        res.send(fileContent);
+      } catch (error) {
+        console.error('Failed to download from S3:', error);
+        res.status(500).json({ error: 'Failed to download file' });
+      }
+    } else {
+      // Local storage - use sendFile
+      const fullPath = path.isAbsolute(filePath) ? filePath : path.resolve(process.cwd(), filePath);
+      console.log(`📥 Downloading local file: ${attachment.originalName} from ${fullPath}`);
+      res.sendFile(fullPath);
+    }
   });
 
   /**
