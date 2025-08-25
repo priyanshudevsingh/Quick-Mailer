@@ -20,6 +20,7 @@ class AuthService {
     );
     
     // Configure SSL/TLS settings for Lambda environment
+    // This fixes the "self-signed certificate" error in production
     if (process.env.NODE_ENV === 'production') {
       // Disable strict SSL verification for Lambda environment
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
