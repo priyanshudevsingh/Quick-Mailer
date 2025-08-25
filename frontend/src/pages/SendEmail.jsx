@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { templatesAPI, uploadAPI, statsAPI } from '../services/api';
+import { templatesAPI, uploadAPI, statisticsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   Send, 
@@ -50,7 +50,7 @@ const SendEmail = () => {
       
       // Try to use the stats API first (now includes real email counters)
       try {
-        const statsResponse = await statsAPI.getDashboardStats();
+        const statsResponse = await statisticsAPI.getStats();
         
         if (statsResponse.data.success) {
           const backendStats = statsResponse.data.data?.stats || statsResponse.data.data || statsResponse.data.stats;
