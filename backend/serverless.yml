@@ -42,13 +42,7 @@ functions:
     handler: src/lambda.handler
     events:
       - httpApi:
-          path: /api/{proxy+}
-          method: ANY
-      - httpApi:
-          path: /api
-          method: ANY
-      - httpApi:
-          path: /
+          path: /{proxy+}
           method: ANY
     environment:
       STAGE: ${self:provider.stage}
