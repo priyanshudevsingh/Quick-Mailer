@@ -37,7 +37,7 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 
 # AWS
 S3_BUCKET=your-bucket-name
-AWS_REGION=us-east-1
+# Note: AWS_REGION is automatically provided by Lambda, don't set it manually
 
 # Frontend
 FRONTEND_URL=https://your-app.vercel.app

@@ -9,7 +9,7 @@ const { ValidationError } = require('../../common/errors/AppError');
 class S3StorageService {
   constructor() {
     this.s3 = new AWS.S3({
-      region: process.env.AWS_REGION || 'us-east-1',
+      // Lambda automatically provides AWS_REGION, no need to set it manually
       // Lambda will use IAM role credentials automatically
     });
     this.bucketName = process.env.S3_BUCKET;

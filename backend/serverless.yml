@@ -18,7 +18,6 @@ provider:
     GOOGLE_REDIRECT_URI: ${env:GOOGLE_REDIRECT_URI}
     FRONTEND_URL: ${env:FRONTEND_URL}
     S3_BUCKET: ${env:S3_BUCKET}
-    AWS_REGION: ${self:provider.region}
   iam:
     role:
       statements:
