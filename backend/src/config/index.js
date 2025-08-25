@@ -54,7 +54,13 @@ const config = {
   
   // Security Configuration
   security: {
-    corsOrigin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    corsOrigin: process.env.NODE_ENV === 'production' 
+      ? [
+          'https://quick-mailer-seven.vercel.app',
+          'https://quick-mailer.vercel.app',
+          process.env.FRONTEND_URL
+        ].filter(Boolean)
+      : process.env.FRONTEND_URL || 'http://localhost:3000',
     rateLimitWindow: 15 * 60 * 1000, // 15 minutes
     rateLimitMax: 100, // Limit each IP to 100 requests per windowMs
   },

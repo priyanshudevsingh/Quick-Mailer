@@ -54,20 +54,20 @@ api.interceptors.response.use(
 // Auth API
 export const authAPI = {
   getGoogleAuthURL: () => {
-    return api.get('/auth/google/url');
+    return api.get('/api/auth/google/url');
   },
-  googleLogin: (idToken) => api.post('/auth/google', { idToken }),
-  getProfile: () => api.get('/auth/profile'),
-  refreshToken: () => api.post('/auth/refresh'),
+  googleLogin: (idToken) => api.post('/api/auth/google', { idToken }),
+  getProfile: () => api.get('/api/auth/profile'),
+  refreshToken: () => api.post('/api/auth/refresh'),
 };
 
 // Templates API
 export const templatesAPI = {
-  getAll: () => api.get('/templates'),
-  getById: (id) => api.get(`/templates/${id}`),
-  create: (data) => api.post('/templates', data),
-  update: (id, data) => api.put(`/templates/${id}`, data),
-  delete: (id) => api.delete(`/templates/${id}`),
+  getAll: () => api.get('/api/templates'),
+  getById: (id) => api.get(`/api/templates/${id}`),
+  create: (data) => api.post('/api/templates', data),
+  update: (id, data) => api.put(`/api/templates/${id}`, data),
+  delete: (id) => api.delete(`/api/templates/${id}`),
 };
 
 // Upload API
@@ -75,61 +75,54 @@ export const uploadAPI = {
   uploadFile: (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    return api.post('/attachments', formData, {
+    return api.post('/api/attachments', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
   },
-  getAll: () => api.get('/attachments'),
-  download: (id) => api.get(`/attachments/${id}/download`, {
+  getAll: () => api.get('/api/attachments'),
+  download: (id) => api.get(`/api/attachments/${id}/download`, {
     responseType: 'blob',
   }),
-  update: (id, data) => api.put(`/attachments/${id}`, data),
-  delete: (id) => api.delete(`/attachments/${id}`),
+  update: (id, data) => api.put(`/api/attachments/${id}`, data),
+  delete: (id) => api.delete(`/api/attachments/${id}`),
 };
 
 // Email API
 export const emailAPI = {
-  sendEmail: (data) => api.post('/email/send', data),
-  saveAsDraft: (data) => api.post('/email/draft', data),
-  generateMassEmailTemplate: (templateId) => api.get(`/email/mass-email/template/${templateId}`, {
+  sendEmail: (data) => api.post('/api/email/send', data),
+  saveAsDraft: (data) => api.post('/api/email/draft', data),
+  generateMassEmailTemplate: (templateId) => api.get(`/api/email/mass-email/template/${templateId}`, {
     responseType: 'blob'
   }),
   sendMassEmail: (templateId, attachmentIds, excelFile) => {
     const formData = new FormData();
     formData.append('templateId', templateId);
     if (attachmentIds && attachmentIds.length > 0) {
-      attachmentIds.forEach(id => formData.append('attachmentIds', id));
+      formData.append('attachmentIds', JSON.stringify(attachmentIds));
     }
-    formData.append('excelFile', excelFile);
-    
-    return api.post('/email/mass-email', formData, {
+    if (excelFile) {
+      formData.append('excelFile', excelFile);
+    }
+    return api.post('/api/email/mass-email', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
   },
-  saveMassEmailAsDrafts: (templateId, attachmentIds, excelFile) => {
-    const formData = new FormData();
-    formData.append('templateId', templateId);
-    if (attachmentIds && attachmentIds.length > 0) {
-      attachmentIds.forEach(id => formData.append('attachmentIds', id));
-    }
-    formData.append('excelFile', excelFile);
-    
-    return api.post('/email/mass-email/drafts', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-  },
-  getHistory: () => api.get('/email/history'),
+  getDrafts: () => api.get('/api/email/drafts'),
+  getDraftById: (id) => api.get(`/api/email/drafts/${id}`),
+  updateDraft: (id, data) => api.put(`/api/email/drafts/${id}`, data),
+  deleteDraft: (id) => api.delete(`/api/email/drafts/${id}`),
 };
 
-// Stats API
-export const statsAPI = {
-  getDashboardStats: () => api.get('/stats/dashboard'),
+// Statistics API
+export const statisticsAPI = {
+  getStats: () => api.get('/api/stats'),
+  getEmailStats: () => api.get('/api/stats/email'),
+  getTemplateStats: () => api.get('/api/stats/templates'),
+  getAttachmentStats: () => api.get('/api/stats/attachments'),
 };
 
 export default api;
