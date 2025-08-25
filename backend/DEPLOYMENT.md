@@ -101,7 +101,7 @@ The GitHub Actions workflow automatically deploys on push to `main`:
 
 After deployment, your API will be available at:
 ```
-https://[api-id].execute-api.[region].amazonaws.com/prod/api/
+https://[api-id].execute-api.[region].amazonaws.com/api/
 ```
 
 **Available endpoints:**
@@ -195,3 +195,21 @@ For deployment issues:
 2. Verify environment variables
 3. Test locally with `serverless offline`
 4. Review IAM permissions
+
+## 🧪 Testing Your Deployment
+
+### Test Health Endpoint
+```bash
+curl https://[api-id].execute-api.[region].amazonaws.com/api/health
+```
+
+**Expected Response:**
+```json
+{
+  "status": "OK",
+  "message": "Email Template Manager API is running",
+  "version": "2.0.0",
+  "environment": "production",
+  "timestamp": "2025-08-25T15:30:00.000Z"
+}
+```

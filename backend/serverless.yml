@@ -10,6 +10,17 @@ provider:
   region: ${opt:region, 'us-east-1'}
   memorySize: 1024
   timeout: 30
+  # Remove stage prefix from API Gateway URLs
+  apiGateway:
+    shouldStartNameWithService: true
+    minimumCompressionSize: 1024
+    binaryMediaTypes: ['*/*']
+  # Force no stage in URL
+  httpApi:
+    cors: true
+    metrics: false
+    # This removes the /prod prefix
+    stage: false
   environment:
     NODE_ENV: ${self:provider.stage}
     DATABASE_URL: ${env:DATABASE_URL}
@@ -42,7 +53,7 @@ functions:
     handler: src/lambda.handler
     events:
       - httpApi:
-          path: /{proxy+}
+          path: /api/{proxy+}
           method: ANY
     environment:
       STAGE: ${self:provider.stage}

@@ -2,25 +2,70 @@
 
 Get your Quick-Mailer backend running on AWS Lambda in 5 minutes!
 
-## ⚡ Quick Commands
+## 🚀 Quick Start Guide
 
+### Option 1: Local Development
 ```bash
-# 1. Install dependencies
-cd backend && npm install
+# Backend
+cd backend
+npm install
+npm run dev
 
-# 2. Setup AWS resources (one-time)
-./scripts/setup-aws.sh
+# Frontend  
+cd frontend
+npm install
+npm run dev
+```
 
-# 3. Configure environment
+### Option 2: Serverless Deployment (AWS Lambda) - Recommended
+
+#### Prerequisites
+- AWS Account with CLI access
+- GitHub repository
+- PostgreSQL database (Avien)
+
+#### Backend Deployment
+```bash
+# 1. Clone and setup
+git clone https://github.com/priyanshudevsingh/Quick-Mailer.git
+cd Quick-Mailer/backend
+
+# 2. Install dependencies
+npm install
+
+# 3. Create environment file
 cp env.serverless.example .env
 # Edit .env with your values
 
-# 4. Deploy to AWS
+# 4. Deploy to AWS Lambda
 npm run deploy
-
-# 5. Get your API URL
-npm run logs
 ```
+
+#### Frontend Configuration
+```bash
+# 1. Update environment variables
+cd frontend
+cp env.example .env
+
+# 2. Set production API URL (NO /prod prefix)
+VITE_API_URL=https://[api-id].execute-api.us-east-1.amazonaws.com
+```
+
+#### Test Your Deployment
+```bash
+# Health check (should return 200 OK)
+curl https://[api-id].execute-api.us-east-1.amazonaws.com/api/health
+
+# Test auth endpoint
+curl https://[api-id].execute-api.us-east-1.amazonaws.com/api/auth/google/url
+```
+
+## 🎯 Expected Results
+- ✅ Backend: AWS Lambda + API Gateway
+- ✅ Frontend: Vercel deployment
+- ✅ API URLs: Simple `/api/*` format (no `/prod`)
+- ✅ Authentication: Google OAuth working
+- ✅ All endpoints: Accessible via `/api/*`
 
 ## 🔑 Required Environment Variables
 

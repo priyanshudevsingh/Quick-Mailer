@@ -5,7 +5,7 @@ import axios from 'axios';
 const getApiBaseUrl = () => {
   // Check for Vercel environment
   if (import.meta.env.VITE_VERCEL_ENV === 'production') {
-    return import.meta.env.VITE_API_URL || 'https://your-api-gateway-url.amazonaws.com/prod';
+    return import.meta.env.VITE_API_URL || 'https://your-api-gateway-url.amazonaws.com';
   }
   
   // Local development
