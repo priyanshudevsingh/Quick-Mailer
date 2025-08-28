@@ -88,24 +88,16 @@ class AttachmentController {
     res.setHeader('Content-Disposition', `attachment; filename="${attachment.originalName}"`);
     res.setHeader('Content-Type', attachment.mimetype);
     
-    // Handle S3 vs local storage
-    if (filePath && filePath.includes('s3.amazonaws.com')) {
-      // S3 storage - redirect to presigned URL or stream content
-      const { StorageService } = require('../../../shared/storage/StorageService');
-      const storageService = new StorageService();
+    try {
+      // Use storage service to get file content (works for both local and S3)
+      const { createStorageService } = require('../../../shared/storage/StorageService');
+      const storageService = createStorageService();
       
-      try {
-        const fileContent = await storageService.getFile(filePath);
-        res.send(fileContent);
-      } catch (error) {
-        console.error('Failed to download from S3:', error);
-        res.status(500).json({ error: 'Failed to download file' });
-      }
-    } else {
-      // Local storage - use sendFile
-      const fullPath = path.isAbsolute(filePath) ? filePath : path.resolve(process.cwd(), filePath);
-      console.log(`📥 Downloading local file: ${attachment.originalName} from ${fullPath}`);
-      res.sendFile(fullPath);
+      const fileContent = await storageService.getFile(filePath);
+      res.send(fileContent);
+    } catch (error) {
+      console.error('Failed to download file:', error);
+      res.status(500).json({ error: 'Failed to download file' });
     }
   });
 

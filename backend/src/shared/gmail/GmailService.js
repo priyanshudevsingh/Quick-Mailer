@@ -9,7 +9,7 @@ const path = require('path');
 const { AppError } = require('../../common/errors/AppError');
 const { ERROR_MESSAGES } = require('../../common/constants');
 const { cleanHtmlForEmail } = require('../../common/utils/emailUtils');
-const { StorageService } = require('../storage/StorageService');
+const { createStorageService } = require('../storage/StorageService');
 
 class GmailService {
   constructor(accessToken) {
@@ -90,12 +90,26 @@ class GmailService {
           // Handle both local and S3 storage
           if (attachment.path && attachment.path.includes('s3.amazonaws.com')) {
             // S3 storage - download file content
-            const storageService = new StorageService();
+            const storageService = createStorageService();
             fileContent = await storageService.getFile(attachment.path);
           } else {
             // Local storage - read from filesystem
-            const filePath = path.join(__dirname, '../../../uploads', attachment.filename);
-            fileContent = await fs.readFile(filePath);
+            // Use the storage service to get the file content instead of direct path resolution
+            const storageService = createStorageService();
+            const filePath = attachment.path || attachment.filename;
+            
+            if (filePath) {
+              try {
+                fileContent = await storageService.getFile(filePath);
+              } catch (storageError) {
+                // Fallback to direct file reading if storage service fails
+                const uploadsPath = path.join(__dirname, '../../../uploads', attachment.filename);
+                fileContent = await fs.readFile(uploadsPath);
+              }
+            } else {
+              console.warn(`Warning: No file path found for attachment ${attachment.originalName}`);
+              continue;
+            }
           }
           
           const base64Content = fileContent.toString('base64');

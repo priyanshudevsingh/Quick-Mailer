@@ -1,21 +1,25 @@
 /**
  * Storage Service - File storage management
- * Automatically switches between local and S3 storage based on environment
+ * Factory function that returns the appropriate storage service
  */
 
 const fs = require('fs').promises;
 const path = require('path');
 const { ValidationError } = require('../../common/errors/AppError');
 
-class StorageService {
+function createStorageService() {
+  // Use S3 in production/Lambda, local storage in development
+  if (process.env.NODE_ENV === 'production' || process.env.S3_BUCKET) {
+    const S3StorageService = require('./S3StorageService');
+    return new S3StorageService();
+  }
+  
+  // Local storage for development
+  return new LocalStorageService();
+}
+
+class LocalStorageService {
   constructor() {
-    // Use S3 in production/Lambda, local storage in development
-    if (process.env.NODE_ENV === 'production' || process.env.S3_BUCKET) {
-      const S3StorageService = require('./S3StorageService');
-      return new S3StorageService();
-    }
-    
-    // Local storage for development
     this.uploadDir = path.join(process.cwd(), 'uploads');
     this.ensureUploadDirExists();
   }
@@ -105,4 +109,7 @@ class StorageService {
   }
 }
 
-module.exports = StorageService;
+module.exports = {
+  createStorageService,
+  LocalStorageService // Expose the class for potential direct use if needed
+};

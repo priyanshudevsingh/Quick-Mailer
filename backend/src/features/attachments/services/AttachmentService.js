@@ -3,15 +3,18 @@
  * Business logic for file attachment management
  */
 
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../../../shared/database');
 const fs = require('fs').promises;
 const path = require('path');
 const Attachment = require('../models/Attachment');
-const StorageService = require('../../../shared/storage/StorageService');
 const { NotFoundError, ValidationError } = require('../../../common/errors/AppError');
+const { createStorageService } = require('../../../shared/storage/StorageService');
+const { SUCCESS_MESSAGES } = require('../../../common/constants');
 
 class AttachmentService {
   constructor() {
-    this.storageService = new StorageService();
+    this.storageService = createStorageService();
   }
 
   /**
