@@ -8,6 +8,7 @@ import { refreshDashboardStats } from '../utils/statsUtils';
 const Attachments = () => {
   const [attachments, setAttachments] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [loadingAttachments, setLoadingAttachments] = useState(true);
   const [deleteModal, setDeleteModal] = useState({ show: false, attachmentId: null, attachmentName: '' });
   const [dragActive, setDragActive] = useState(false);
   const [editingDescription, setEditingDescription] = useState(null);
@@ -29,6 +30,7 @@ const Attachments = () => {
 
   const loadAttachments = async () => {
     try {
+      setLoadingAttachments(true);
       const response = await uploadAPI.getAll();
       
       // Handle the API response structure - backend returns {attachments: [...]}
@@ -37,6 +39,8 @@ const Attachments = () => {
     } catch (error) {
       console.error('Failed to load attachments:', error);
       toast.error('Failed to load attachments');
+    } finally {
+      setLoadingAttachments(false);
     }
   };
 
@@ -227,122 +231,105 @@ const Attachments = () => {
       </div>
 
       {/* Attachments Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-        {(attachments || []).map((attachment) => {
-          const timeAgo = getTimeAgo(attachment.createdAt || attachment.uploadedAt);
-          const currentDescription = attachment.description || '';
-          
-          return (
-            <div key={attachment.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 h-fit">
-              <div className="p-6 break-words">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center min-w-0 flex-1">
-                    <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg mr-3">
-                      {getFileIcon(attachment.mimetype)}
+      {!loadingAttachments && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+          {(attachments || []).map((attachment) => {
+            const timeAgo = getTimeAgo(attachment.createdAt || attachment.uploadedAt);
+            const currentDescription = attachment.description || '';
+            
+            return (
+              <div key={attachment.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 h-fit">
+                <div className="p-6 break-words">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center min-w-0 flex-1">
+                      <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg mr-3">
+                        {getFileIcon(attachment.mimetype)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-gray-900 break-words leading-tight" title={attachment.originalName}>
+                          {attachment.originalName}
+                        </h3>
+                        <p className="text-sm text-gray-500">{formatFileSize(attachment.size)}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold text-gray-900 break-words leading-tight" title={attachment.originalName}>
-                        {attachment.originalName}
-                      </h3>
-                      <p className="text-sm text-gray-500">{formatFileSize(attachment.size)}</p>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleDownload(attachment)}
+                        className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                        title="Download file"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(attachment)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete file"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleDownload(attachment)}
-                      className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                      title="Download"
-                    >
-                      <Download className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(attachment)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <div>
-                    <span className="text-xs text-gray-500">Type: {attachment.mimetype}</span>
                   </div>
                   
-                  {/* Description Section */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-sm font-medium text-gray-700">Description</label>
-                      {editingDescription !== attachment.id && (
-                        <button
-                          onClick={() => handleDescriptionEdit(attachment.id)}
-                          className="text-xs text-primary-600 hover:text-primary-800"
-                        >
-                          {currentDescription ? 'Edit' : 'Add'}
-                        </button>
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-1">Description</h4>
+                      {editingDescription === attachment.id ? (
+                        <div className="space-y-2">
+                          <textarea
+                            className="w-full text-sm border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                            rows="2"
+                            defaultValue={currentDescription}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && e.ctrlKey) {
+                                const textarea = e.target;
+                                saveDescription(attachment.id, textarea.value);
+                              }
+                            }}
+                            autoFocus
+                          />
+                          <div className="flex justify-end space-x-2">
+                            <button
+                              onClick={cancelDescriptionEdit}
+                              className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                const textarea = e.target.closest('.space-y-2').querySelector('textarea');
+                                saveDescription(attachment.id, textarea.value);
+                              }}
+                              className="px-3 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700"
+                            >
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-2 min-h-[2.5rem]">
+                          {currentDescription || 'No description added'}
+                        </p>
                       )}
                     </div>
                     
-                    {editingDescription === attachment.id ? (
-                      <div className="space-y-2">
-                        <textarea
-                          className="w-full p-2 text-sm border border-gray-300 rounded-lg resize-none"
-                          rows="2"
-                          placeholder="Add a description for this file..."
-                          defaultValue={currentDescription}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              saveDescription(attachment.id, e.target.value);
-                            } else if (e.key === 'Escape') {
-                              cancelDescriptionEdit();
-                            }
-                          }}
-                          autoFocus
-                        />
-                        <div className="flex justify-end space-x-2">
-                          <button
-                            onClick={cancelDescriptionEdit}
-                            className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              const textarea = e.target.closest('.space-y-2').querySelector('textarea');
-                              saveDescription(attachment.id, textarea.value);
-                            }}
-                            className="px-3 py-1 text-xs bg-primary-600 text-white rounded hover:bg-primary-700"
-                          >
-                            Save
-                          </button>
-                        </div>
+                    {/* Timestamp at bottom right */}
+                    <div className="flex items-center justify-end pt-3 border-t border-gray-100">
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Clock className="w-3 h-3 mr-1" />
+                        <span className="font-medium">Uploaded</span>
+                        <span className="ml-1">{timeAgo}</span>
                       </div>
-                    ) : (
-                      <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-2 min-h-[2.5rem]">
-                        {currentDescription || 'No description added'}
-                      </p>
-                    )}
-                  </div>
-                  
-                  {/* Timestamp at bottom right */}
-                  <div className="flex items-center justify-end pt-3 border-t border-gray-100">
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="w-3 h-3 mr-1" />
-                      <span className="font-medium">Uploaded</span>
-                      <span className="ml-1">{timeAgo}</span>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Empty State */}
-      {(attachments || []).length === 0 && (
+      {!loadingAttachments && (attachments || []).length === 0 && (
         <div className="text-center py-12">
           <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4">
             <Paperclip className="w-8 h-8 text-gray-400" />
@@ -356,6 +343,14 @@ const Attachments = () => {
             <Upload className="w-4 h-4 mr-2" />
             Upload Files
           </button>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loadingAttachments && (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading attachments...</p>
         </div>
       )}
 

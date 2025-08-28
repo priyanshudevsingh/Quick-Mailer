@@ -12,6 +12,7 @@ const Templates = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [placeholders, setPlaceholders] = useState([]);
   const [error, setError] = useState(null);
   
@@ -51,6 +52,7 @@ const Templates = () => {
 
   const loadTemplates = async () => {
     try {
+      setLoadingTemplates(true);
       setError(null);
       const response = await templatesAPI.getAll();
       
@@ -61,6 +63,8 @@ const Templates = () => {
       console.error('Failed to load templates:', error);
       setError('Failed to load templates');
       toast.error('Failed to load templates');
+    } finally {
+      setLoadingTemplates(false);
     }
   };
 
@@ -267,109 +271,105 @@ const Templates = () => {
       )}
 
       {/* Templates Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-        {(templates || []).map((template) => {
-          try {
-            // Ensure template has required properties
-            if (!template || typeof template !== 'object' || !template.id) {
-              return null;
-            }
-            
-            const templateName = typeof template.name === 'string' ? template.name : 'Unnamed Template';
-            const templateSubject = typeof template.subject === 'string' ? template.subject : 'No subject';
-            const templateBody = typeof template.body === 'string' ? template.body : '';
-            const templatePlaceholders = Array.isArray(template.placeholders) ? template.placeholders : [];
-            
-            // Determine which timestamp to show (edited if updated recently, otherwise created)
-            const createdAt = template.createdAt;
-            const updatedAt = template.updatedAt;
-            const wasEdited = createdAt !== updatedAt;
-            const displayTime = wasEdited ? updatedAt : createdAt;
-            const timeLabel = wasEdited ? 'Edited' : 'Created';
-            const timeAgo = getTimeAgo(displayTime);
-            
-            return (
-              <div key={template.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 h-fit">
-                <div className="p-6 break-words">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center">
-                      <div className="flex items-center justify-center w-10 h-10 bg-primary-100 rounded-lg mr-3">
-                        <FileText className="w-5 h-5 text-primary-600" />
+      {!loadingTemplates && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+          {(templates || []).map((template) => {
+            try {
+              // Ensure template has required properties
+              if (!template || typeof template !== 'object' || !template.id) {
+                return null;
+              }
+              
+              const templateName = typeof template.name === 'string' ? template.name : 'Unnamed Template';
+              const templateSubject = typeof template.subject === 'string' ? template.subject : 'No subject';
+              const templateBody = typeof template.body === 'string' ? template.body : '';
+              const templatePlaceholders = Array.isArray(template.placeholders) ? template.placeholders : [];
+              
+              // Determine which timestamp to show (edited if updated recently, otherwise created)
+              const createdAt = template.createdAt;
+              const updatedAt = template.updatedAt;
+              const wasEdited = createdAt !== updatedAt;
+              const displayTime = wasEdited ? updatedAt : createdAt;
+              const timeLabel = wasEdited ? 'Edited' : 'Created';
+              const timeAgo = getTimeAgo(displayTime);
+              
+              return (
+                <div key={template.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 h-fit">
+                  {/* Template content */}
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{templateName}</h3>
+                        <p className="text-sm text-gray-600 mb-3">{templateSubject}</p>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-gray-900 break-words leading-tight" title={templateName}>{templateName}</h3>
-                        <p className="text-sm text-gray-500">{templatePlaceholders.length} placeholders</p>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleEdit(template)}
+                          className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                          title="Edit template"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(template)}
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete template"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(template)}
-                        className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(template)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-1">Subject</h4>
-                      <p className="text-sm text-gray-900 bg-gray-50 rounded-lg p-2 break-words" title={templateSubject}>{templateSubject}</p>
-                    </div>
-                    
-                    {templatePlaceholders.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-1">Placeholders</h4>
+
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Placeholders</span>
+                        <span className="text-xs text-gray-400">{templatePlaceholders.length}</span>
+                      </div>
+                      {templatePlaceholders.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
-                          {templatePlaceholders.map((placeholder) => {
-                            if (typeof placeholder !== 'string' || !placeholder.trim()) {
-                              return null;
-                            }
-                            return (
-                              <span
-                                key={placeholder}
-                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800 break-all"
-                                title={placeholder}
-                              >
-                                {placeholder}
-                              </span>
-                            );
-                          })}
+                          {templatePlaceholders.slice(0, 3).map((placeholder, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
+                            >
+                              {placeholder}
+                            </span>
+                          ))}
+                          {templatePlaceholders.length > 3 && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                              +{templatePlaceholders.length - 3} more
+                            </span>
+                          )}
                         </div>
-                      </div>
-                    )}
-                    
-                    {/* Timestamp at bottom right */}
-                    <div className="flex items-center justify-end mt-4 pt-3 border-t border-gray-100">
-                      <div className="flex items-center text-xs text-gray-500">
+                      ) : (
+                        <p className="text-xs text-gray-400 italic">No placeholders</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center">
                         <Clock className="w-3 h-3 mr-1" />
-                        <span className="font-medium">{timeLabel}</span>
+                        <span>{timeLabel}</span>
                         <span className="ml-1">{timeAgo}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          } catch (error) {
-            console.error('Error rendering template:', error, template);
-            return (
-              <div key={`error-${Math.random()}`} className="bg-red-50 rounded-xl border border-red-200 p-6">
-                <p className="text-red-800">Error rendering template</p>
-              </div>
-            );
-          }
-        })}
-      </div>
+              );
+            } catch (error) {
+              console.error('Error rendering template:', error, template);
+              return (
+                <div key={`error-${Math.random()}`} className="bg-red-50 rounded-xl border border-red-200 p-6">
+                  <p className="text-red-800">Error rendering template</p>
+                </div>
+              );
+            }
+          })}
+        </div>
+      )}
 
       {/* Empty State */}
-      {(templates || []).length === 0 && !showForm && (
+      {!loadingTemplates && (templates || []).length === 0 && !showForm && (
         <div className="text-center py-12">
           <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4">
             <FileText className="w-8 h-8 text-gray-400" />
@@ -383,6 +383,14 @@ const Templates = () => {
             <Plus className="w-4 h-4 mr-2" />
             Create Template
           </button>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loadingTemplates && (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading templates...</p>
         </div>
       )}
 
