@@ -11,6 +11,9 @@ const statisticsController = new StatisticsController();
 
 router.use(authenticateToken);
 
+// Root stats endpoint (returns dashboard stats)
+router.get('/', statisticsController.getDashboardStats);
+
 // Statistics endpoints
 router.get('/dashboard', statisticsController.getDashboardStats);
 router.get('/analytics', statisticsController.getDetailedAnalytics);
