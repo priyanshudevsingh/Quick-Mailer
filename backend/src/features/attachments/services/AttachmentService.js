@@ -72,7 +72,7 @@ class AttachmentService {
       filename: fileInfo.filename,
       mimetype: fileInfo.mimetype,
       size: fileInfo.size,
-      path: fileInfo.fullPath,
+      path: fileInfo.s3Key || fileInfo.relativePath || fileInfo.fullPath,
     });
   }
 
@@ -121,11 +121,15 @@ class AttachmentService {
   async getAttachmentForDownload(attachmentId, userId) {
     const attachment = await this.getAttachmentById(attachmentId, userId);
 
-    // Check if file exists using the storage service
-    try {
-      await this.storageService.getFile(attachment.path);
-    } catch (error) {
-      throw new NotFoundError('File not found on server');
+    // For S3 storage, we don't need to check file existence here
+    // The presigned URL generation will handle that
+    // For local storage, we can check if file exists
+    if (process.env.NODE_ENV !== 'production' && !attachment.path.includes('s3.amazonaws.com')) {
+      try {
+        await this.storageService.getFile(attachment.path);
+      } catch (error) {
+        throw new NotFoundError('File not found on server');
+      }
     }
 
     return {
