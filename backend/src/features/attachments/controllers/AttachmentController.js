@@ -83,30 +83,20 @@ class AttachmentController {
       attachmentId, 
       req.user.id
     );
-
+  
     try {
       const { createStorageService } = require('../../../shared/storage/StorageService');
       const storageService = createStorageService();
       
-      // Check if this is S3 storage
-      if (filePath && (filePath.includes('s3.amazonaws.com') || process.env.NODE_ENV === 'production')) {
-        // For S3 storage, generate a presigned URL for direct download
-        const presignedUrl = await storageService.generatePresignedUrl(
-          attachment.filename, 
-          'getObject', 
-          300 // 5 minutes expiry
-        );
-        
-        // Redirect to the presigned URL for direct S3 download
-        res.redirect(presignedUrl);
-      } else {
-        // For local storage, stream the file directly
-        res.setHeader('Content-Disposition', `attachment; filename="${attachment.originalName}"`);
-        res.setHeader('Content-Type', attachment.mimetype);
-        
-        const fileContent = await storageService.getFile(filePath);
-        res.send(fileContent);
-      }
+      // For both S3 and local storage, stream the file through our API
+      // This avoids CORS issues with S3
+      res.setHeader('Content-Disposition', `attachment; filename="${attachment.originalName}"`);
+      res.setHeader('Content-Type', attachment.mimetype);
+      
+      // Get file content and stream it
+      const fileContent = await storageService.getFile(filePath);
+      res.send(fileContent);
+      
     } catch (error) {
       console.error('Failed to download file:', error);
       res.status(500).json({ error: 'Failed to download file' });
@@ -134,26 +124,20 @@ class AttachmentController {
       attachmentId, 
       req.user.id
     );
-
+  
     try {
-      const { createStorageService } = require('../../../shared/storage/StorageService');
-      const storageService = createStorageService();
-      
-      // Generate presigned URL for S3 download
-      const presignedUrl = await storageService.generatePresignedUrl(
-        attachment.filename, 
-        'getObject', 
-        300 // 5 minutes expiry
-      );
+      // Instead of S3 presigned URL, provide our API download URL
+      // This avoids CORS issues
+      const downloadUrl = `${process.env.API_BASE_URL || 'http://localhost:3001'}/api/attachments/${attachmentId}/download`;
       
       ResponseUtils.success(res, { 
-        presignedUrl,
+        downloadUrl,
         filename: attachment.originalName,
-        expiresIn: 300
-      }, 'Presigned URL generated successfully');
+        expiresIn: 3600 // 1 hour
+      }, 'Download URL generated successfully');
     } catch (error) {
-      console.error('Failed to generate presigned URL:', error);
-      res.status(500).json({ error: 'Failed to generate presigned URL' });
+      console.error('Failed to generate download URL:', error);
+      res.status(500).json({ error: 'Failed to generate download URL' });
     }
   });
 }

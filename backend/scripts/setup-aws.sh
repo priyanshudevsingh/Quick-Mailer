@@ -32,8 +32,13 @@ fi
 echo "✅ AWS CLI and credentials verified"
 
 # Create S3 bucket
-echo "🪣 Creating S3 bucket: $BUCKET_NAME"
-aws s3 mb "s3://$BUCKET_NAME" --region "$REGION"
+echo "🪣 Checking S3 bucket: $BUCKET_NAME"
+if aws s3 ls "s3://$BUCKET_NAME" &> /dev/null; then
+    echo "✅ Bucket $BUCKET_NAME already exists"
+else
+    echo "🪣 Creating S3 bucket: $BUCKET_NAME"
+    aws s3 mb "s3://$BUCKET_NAME" --region "$REGION"
+fi
 
 # Configure CORS for S3 bucket
 echo "🔧 Configuring CORS for S3 bucket"
@@ -147,4 +152,4 @@ echo "2. Update your frontend environment with the new API Gateway URL"
 echo "3. Run 'npm run deploy' to deploy your Lambda function"
 echo ""
 echo "🔗 S3 Bucket: s3://$BUCKET_NAME"
-echo "🌐 Region: $REGION"
+echo "�� Region: $REGION"
