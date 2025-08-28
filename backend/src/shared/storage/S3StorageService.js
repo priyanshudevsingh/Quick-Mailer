@@ -121,14 +121,27 @@ class S3StorageService {
 
   async generatePresignedUrl(filename, operation = 'getObject', expiresIn = 3600) {
     try {
-      const key = `uploads/${filename}`;
+      // Handle different filename formats
+      let key = filename;
+      if (!filename.includes('uploads/')) {
+        key = `uploads/${filename}`;
+      }
+      
+      // Validate bucket exists
+      if (!this.bucketName) {
+        throw new Error('S3_BUCKET environment variable is not set');
+      }
+      
       const params = {
         Bucket: this.bucketName,
         Key: key,
         Expires: expiresIn
       };
 
+      console.log(`🔗 Generating presigned URL for: ${key} in bucket: ${this.bucketName}`);
       const url = await this.s3.getSignedUrlPromise(operation, params);
+      
+      console.log(`✅ Presigned URL generated successfully for: ${filename}`);
       return url;
     } catch (error) {
       console.error('❌ Failed to generate presigned URL:', error);

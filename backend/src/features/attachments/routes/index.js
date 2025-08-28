@@ -25,5 +25,6 @@ router.get('/:id', attachmentController.getAttachment);
 router.put('/:id', attachmentController.updateAttachment);
 router.delete('/:id', attachmentController.deleteAttachment);
 router.get('/:id/download', attachmentController.downloadAttachment);
+router.get('/:id/presigned-url', attachmentController.getPresignedUrl);
 
 module.exports = router;
