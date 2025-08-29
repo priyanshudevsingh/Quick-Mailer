@@ -77,29 +77,60 @@ class AttachmentController {
    * GET /attachments/:id/download
    */
   downloadAttachment = asyncHandler(async (req, res) => {
-    const attachmentId = parseInt(req.params.id);
+    console.log('🔍 [AttachmentController] downloadAttachment called');
+    console.log('📋 Request params:', req.params);
+    console.log('👤 User ID:', req.user.id);
     
-    const { attachment, filePath } = await this.attachmentService.getAttachmentForDownload(
-      attachmentId, 
-      req.user.id
-    );
-  
+    const attachmentId = parseInt(req.params.id);
+    console.log('🆔 Parsed attachment ID:', attachmentId);
+    
     try {
+      console.log('🔍 [AttachmentController] Getting attachment for download...');
+      const { attachment, filePath } = await this.attachmentService.getAttachmentForDownload(
+        attachmentId, 
+        req.user.id
+      );
+      
+      console.log('📎 [AttachmentController] Attachment found:', {
+        id: attachment.id,
+        filename: attachment.filename,
+        originalName: attachment.originalName,
+        mimetype: attachment.mimetype,
+        filePath: filePath
+      });
+  
+      console.log('🔍 [AttachmentController] Creating storage service...');
       const { createStorageService } = require('../../../shared/storage/StorageService');
       const storageService = createStorageService();
+      console.log('✅ [AttachmentController] Storage service created');
       
       // For both S3 and local storage, stream the file through our API
       // This avoids CORS issues with S3
+      console.log('📤 [AttachmentController] Setting response headers...');
       res.setHeader('Content-Disposition', `attachment; filename="${attachment.originalName}"`);
       res.setHeader('Content-Type', attachment.mimetype);
+      console.log('✅ [AttachmentController] Headers set');
       
       // Get file content and stream it
+      console.log('🔍 [AttachmentController] Getting file content from storage...');
       const fileContent = await storageService.getFile(filePath);
+      console.log('✅ [AttachmentController] File content retrieved, size:', fileContent?.length || 'unknown');
+      
+      console.log('📤 [AttachmentController] Sending file content...');
       res.send(fileContent);
+      console.log('✅ [AttachmentController] File sent successfully');
       
     } catch (error) {
-      console.error('Failed to download file:', error);
-      res.status(500).json({ error: 'Failed to download file' });
+      console.error('❌ [AttachmentController] Error in downloadAttachment:', error);
+      console.error('❌ [AttachmentController] Error stack:', error.stack);
+      console.error('❌ [AttachmentController] Error message:', error.message);
+      
+      // Send a more detailed error response
+      res.status(500).json({ 
+        error: 'Failed to download file',
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
     }
   });
 
