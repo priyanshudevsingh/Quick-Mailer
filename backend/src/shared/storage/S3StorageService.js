@@ -53,8 +53,6 @@ class S3StorageService {
 
       const result = await this.s3.upload(uploadParams).promise();
       
-      console.log(`✅ File stored successfully in S3: ${filename}`);
-      
       return {
         filename,
         originalName: file.originalname,
@@ -81,7 +79,6 @@ class S3StorageService {
         Key: key
       }).promise();
       
-      console.log(`✅ File deleted successfully from S3: ${key}`);
       return true;
     } catch (error) {
       console.error('❌ Failed to delete file from S3:', error);
@@ -90,31 +87,18 @@ class S3StorageService {
   }
 
   async getFile(filePath) {
-    console.log('🔍 [S3StorageService] getFile called');
-    console.log('📋 filePath:', filePath);
-    console.log('🏪 bucketName:', this.bucketName);
-    
     try {
       // Extract S3 key from filePath
       const key = filePath.includes('uploads/') ? filePath : `uploads/${filePath}`;
-      console.log('🔑 Extracted S3 key:', key);
       
-      console.log('🔍 [S3StorageService] Calling S3 getObject...');
       const result = await this.s3.getObject({
         Bucket: this.bucketName,
         Key: key
       }).promise();
       
-      console.log('✅ [S3StorageService] S3 getObject successful');
-      console.log('📊 File size from S3:', result.Body?.length || 'unknown');
-      console.log('📋 Content-Type from S3:', result.ContentType);
-      
       return result.Body;
     } catch (error) {
-      console.error('❌ [S3StorageService] Failed to read file from S3:', error);
-      console.error('❌ [S3StorageService] Error code:', error.code);
-      console.error('❌ [S3StorageService] Error message:', error.message);
-      console.error('❌ [S3StorageService] Error stack:', error.stack);
+      console.error('Failed to read file from S3:', error);
       throw new Error(`File not found: ${filePath}`);
     }
   }
@@ -151,10 +135,8 @@ class S3StorageService {
         Expires: expiresIn
       };
 
-      console.log(`🔗 Generating presigned URL for: ${key} in bucket: ${this.bucketName}`);
       const url = await this.s3.getSignedUrlPromise(operation, params);
       
-      console.log(`✅ Presigned URL generated successfully for: ${filename}`);
       return url;
     } catch (error) {
       console.error('❌ Failed to generate presigned URL:', error);

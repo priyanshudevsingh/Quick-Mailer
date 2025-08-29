@@ -119,46 +119,26 @@ class AttachmentService {
    * @returns {object} File information for download
    */
   async getAttachmentForDownload(attachmentId, userId) {
-    console.log('🔍 [AttachmentService] getAttachmentForDownload called');
-    console.log('📋 Params:', { attachmentId, userId });
-    
     try {
-      console.log('🔍 [AttachmentService] Getting attachment by ID...');
       const attachment = await this.getAttachmentById(attachmentId, userId);
-      console.log('✅ [AttachmentService] Attachment found:', {
-        id: attachment.id,
-        filename: attachment.filename,
-        path: attachment.path,
-        mimetype: attachment.mimetype
-      });
 
       // For S3 storage, we don't need to check file existence here
       // The presigned URL generation will handle that
       // For local storage, we can check if file exists
       if (process.env.NODE_ENV !== 'production' && !attachment.path.includes('s3.amazonaws.com')) {
-        console.log('🔍 [AttachmentService] Checking local file existence...');
         try {
           await this.storageService.getFile(attachment.path);
-          console.log('✅ [AttachmentService] Local file exists');
         } catch (error) {
-          console.error('❌ [AttachmentService] Local file not found:', error.message);
           throw new NotFoundError('File not found on server');
         }
-      } else {
-        console.log('🔍 [AttachmentService] Skipping file existence check (S3 or production)');
       }
 
-      const result = {
+      return {
         attachment,
         filePath: attachment.path
       };
       
-      console.log('✅ [AttachmentService] Returning result:', result);
-      return result;
-      
     } catch (error) {
-      console.error('❌ [AttachmentService] Error in getAttachmentForDownload:', error);
-      console.error('❌ [AttachmentService] Error stack:', error.stack);
       throw error;
     }
   }
