@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
   const refreshUser = async () => {
     try {
       const response = await authAPI.getProfile();
-      const updatedUser = response.data.user;
+      const updatedUser = response.data.data.user;
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
     } catch (error) {

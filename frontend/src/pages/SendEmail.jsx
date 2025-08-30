@@ -71,8 +71,9 @@ const SendEmail = () => {
       try {
         const profileResponse = await authAPI.getProfile();
         const profileData = profileResponse.data?.data || profileResponse.data;
-        emailsSent = profileData?.emailsSent || 0;
-        draftsCreated = profileData?.draftsCreated || 0;
+        const userProfile = profileData?.user || profileData;
+        emailsSent = userProfile?.emailsSent || 0;
+        draftsCreated = userProfile?.draftsCreated || 0;
       } catch (error) {
         console.error('Failed to load profile stats:', error);
       }
