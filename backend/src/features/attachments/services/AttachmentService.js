@@ -24,7 +24,7 @@ class AttachmentService {
    */
   async getUserAttachments(userId) {
     return await Attachment.findAll({
-      where: { userId, isActive: true },
+      where: { userId },
       order: [['createdAt', 'DESC']],
       attributes: ['id', 'originalName', 'filename', 'mimetype', 'size', 'description', 'createdAt']
     });
@@ -40,8 +40,7 @@ class AttachmentService {
     const attachment = await Attachment.findOne({
       where: {
         id: attachmentId,
-        userId,
-        isActive: true
+        userId
       }
     });
 
@@ -85,16 +84,18 @@ class AttachmentService {
   async deleteAttachment(attachmentId, userId) {
     const attachment = await this.getAttachmentById(attachmentId, userId);
 
-    // Delete file from filesystem
+    // Delete file from S3/local storage first
     try {
-      await this.storageService.deleteFile(attachment.filename);
+      await this.storageService.deleteFile(attachment.path);
+      console.log(`✅ File deleted from storage: ${attachment.path}`);
     } catch (error) {
-      console.warn(`Warning: Could not delete file ${attachment.filename}:`, error.message);
+      console.warn(`⚠️ Warning: Could not delete file ${attachment.path}:`, error.message);
       // Continue with database deletion even if file deletion fails
     }
 
-    // Soft delete from database
-    await attachment.update({ isActive: false });
+    // Hard delete from database (completely remove the record)
+    await attachment.destroy();
+    console.log(`✅ Database record deleted for attachment ID: ${attachmentId}`);
     
     return true;
   }

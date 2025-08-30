@@ -367,8 +367,7 @@ class EmailService {
     return await Attachment.findAll({
       where: {
         id: attachmentIds,
-        userId,
-        isActive: true
+        userId
       }
     });
   }
