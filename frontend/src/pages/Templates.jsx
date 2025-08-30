@@ -124,6 +124,8 @@ const Templates = () => {
       if (editingTemplate) {
         await templatesAPI.update(editingTemplate.id, templateData);
         toast.success('Template updated successfully!');
+        // Refresh dashboard stats when template is updated
+        refreshDashboardStats();
       } else {
         await templatesAPI.create(templateData);
         toast.success('Template created successfully!');

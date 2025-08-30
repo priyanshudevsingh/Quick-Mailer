@@ -108,6 +108,8 @@ const Attachments = () => {
       
       setEditingDescription(null);
       toast.success('Description updated successfully!');
+      // Refresh dashboard stats when attachment is updated
+      refreshDashboardStats();
     } catch (error) {
       console.error('Failed to update description:', error);
       toast.error('Failed to update description');
