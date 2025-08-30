@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { templatesAPI, uploadAPI } from '../services/api';
+import { templatesAPI, uploadAPI, authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   Send, 
@@ -29,11 +29,16 @@ const SendEmail = () => {
     const handleWindowFocus = () => {
       loadStats();
     };
+    const handleStatsUpdate = () => {
+      loadStats();
+    };
     
     window.addEventListener('focus', handleWindowFocus);
+    window.addEventListener('statsUpdate', handleStatsUpdate);
     
     return () => {
       window.removeEventListener('focus', handleWindowFocus);
+      window.removeEventListener('statsUpdate', handleStatsUpdate);
     };
   }, []);
 
@@ -44,6 +49,8 @@ const SendEmail = () => {
       // Load individual counts
       let templateCount = 0;
       let attachmentCount = 0;
+      let emailsSent = 0;
+      let draftsCreated = 0;
       
       try {
         const templatesResponse = await templatesAPI.getAll();
@@ -61,11 +68,20 @@ const SendEmail = () => {
         console.error('Failed to load attachments:', error);
       }
       
+      try {
+        const profileResponse = await authAPI.getProfile();
+        const profileData = profileResponse.data?.data || profileResponse.data;
+        emailsSent = profileData?.emailsSent || 0;
+        draftsCreated = profileData?.draftsCreated || 0;
+      } catch (error) {
+        console.error('Failed to load profile stats:', error);
+      }
+      
       setStats({
         templates: templateCount,
         attachments: attachmentCount,
-        emailsSent: 0,
-        drafts: 0
+        emailsSent: emailsSent,
+        drafts: draftsCreated
       });
       
     } catch (error) {
