@@ -18,7 +18,7 @@ const authRoutes = require('./features/auth/routes');
 const templateRoutes = require('./features/templates/routes');
 const attachmentRoutes = require('./features/attachments/routes');
 const emailRoutes = require('./features/email/routes');
-const statisticsRoutes = require('./features/statistics/routes');
+
 
 const app = express();
 
@@ -50,7 +50,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/attachments', attachmentRoutes);
 app.use('/api/email', emailRoutes);
-app.use('/api/stats', statisticsRoutes);
+
 
 // Database sync endpoint (for development/setup only)
 app.get('/api/db/sync', async (req, res) => {

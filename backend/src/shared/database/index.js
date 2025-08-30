@@ -68,13 +68,7 @@ const forceSyncDatabase = async () => {
       return { success: false, error: `Template model load failed: ${error.message}` };
     }
     
-    try {
-      require('../../features/email/models/Email');
-      console.log('✅ Email model loaded');
-    } catch (error) {
-      console.error('❌ Failed to load Email model:', error.message);
-      return { success: false, error: `Email model load failed: ${error.message}` };
-    }
+
     
     try {
       require('../../features/attachments/models/Attachment');
@@ -84,13 +78,7 @@ const forceSyncDatabase = async () => {
       return { success: false, error: `Attachment model load failed: ${error.message}` };
     }
     
-    try {
-      require('../../features/statistics/models/Statistics');
-      console.log('✅ Statistics model loaded');
-    } catch (error) {
-      console.error('❌ Failed to load Statistics model:', error.message);
-      return { success: false, error: `Statistics model load failed: ${error.message}` };
-    }
+
     
     // Force sync with alter: true to create tables
     console.log('🔄 Starting database sync...');
