@@ -306,9 +306,20 @@ const Attachments = () => {
                           </div>
                         </div>
                       ) : (
-                        <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-2 min-h-[2.5rem]">
-                          {currentDescription || 'No description added'}
-                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-2 min-h-[2.5rem] flex-1">
+                            {currentDescription || 'No description added'}
+                          </p>
+                          <button
+                            onClick={() => handleDescriptionEdit(attachment.id)}
+                            className="ml-2 p-1 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
+                            title="Edit description"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                        </div>
                       )}
                     </div>
                     
