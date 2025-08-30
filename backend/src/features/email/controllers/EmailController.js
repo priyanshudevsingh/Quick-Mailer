@@ -38,9 +38,18 @@ class EmailController {
    * POST /email/mass-email
    */
   sendMassEmail = asyncHandler(async (req, res) => {
+    let attachmentIds = [];
+    try {
+      if (req.body.attachmentIds) {
+        attachmentIds = JSON.parse(req.body.attachmentIds);
+      }
+    } catch (error) {
+      throw new Error('Invalid attachmentIds format. Expected JSON array.');
+    }
+
     const massEmailData = {
       templateId: req.body.templateId,
-      attachmentIds: req.body.attachmentIds || [],
+      attachmentIds,
       excelFile: req.file
     };
 
@@ -54,9 +63,18 @@ class EmailController {
    * POST /email/mass-email/drafts
    */
   saveMassEmailAsDrafts = asyncHandler(async (req, res) => {
+    let attachmentIds = [];
+    try {
+      if (req.body.attachmentIds) {
+        attachmentIds = JSON.parse(req.body.attachmentIds);
+      }
+    } catch (error) {
+      throw new Error('Invalid attachmentIds format. Expected JSON array.');
+    }
+
     const massEmailData = {
       templateId: req.body.templateId,
-      attachmentIds: req.body.attachmentIds || [],
+      attachmentIds,
       excelFile: req.file
     };
 
