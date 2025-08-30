@@ -36,9 +36,17 @@ const SendEmail = () => {
     window.addEventListener('focus', handleWindowFocus);
     window.addEventListener('statsUpdate', handleStatsUpdate);
     
+    // Also refresh stats periodically when dashboard is visible
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadStats();
+      }
+    }, 10000); // Refresh every 10 seconds when visible
+    
     return () => {
       window.removeEventListener('focus', handleWindowFocus);
       window.removeEventListener('statsUpdate', handleStatsUpdate);
+      clearInterval(interval);
     };
   }, []);
 
@@ -54,7 +62,7 @@ const SendEmail = () => {
       
       try {
         const templatesResponse = await templatesAPI.getAll();
-        const templatesData = Array.isArray(templatesResponse.data) ? templatesResponse.data : templatesResponse.data?.templates || [];
+        const templatesData = templatesResponse.data?.data?.templates || templatesResponse.data?.templates || [];
         templateCount = templatesData.length;
       } catch (error) {
         console.error('Failed to load templates:', error);
@@ -62,7 +70,7 @@ const SendEmail = () => {
       
       try {
         const attachmentsResponse = await uploadAPI.getAll();
-        const attachmentsData = Array.isArray(attachmentsResponse.data) ? attachmentsResponse.data : attachmentsResponse.data?.attachments || [];
+        const attachmentsData = attachmentsResponse.data?.data?.attachments || attachmentsResponse.data?.attachments || [];
         attachmentCount = attachmentsData.length;
       } catch (error) {
         console.error('Failed to load attachments:', error);
