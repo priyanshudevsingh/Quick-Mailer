@@ -112,6 +112,21 @@ export const emailAPI = {
       },
     });
   },
+  saveMassEmailAsDrafts: (templateId, attachmentIds, excelFile) => {
+    const formData = new FormData();
+    formData.append('templateId', templateId);
+    if (attachmentIds && attachmentIds.length > 0) {
+      formData.append('attachmentIds', JSON.stringify(attachmentIds));
+    }
+    if (excelFile) {
+      formData.append('excelFile', excelFile);
+    }
+    return api.post('/api/email/mass-email/drafts', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
   getDrafts: () => api.get('/api/email/drafts'),
   getDraftById: (id) => api.get(`/api/email/drafts/${id}`),
   updateDraft: (id, data) => api.put(`/api/email/drafts/${id}`, data),
