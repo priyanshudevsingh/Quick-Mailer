@@ -124,6 +124,15 @@ class AuthController {
     
     ResponseUtils.success(res, null, 'Logout successful');
   });
+
+  /**
+   * Get dashboard statistics
+   * GET /auth/dashboard-stats
+   */
+  getDashboardStats = asyncHandler(async (req, res) => {
+    const stats = await this.authService.getDashboardStats(req.user.id);
+    ResponseUtils.success(res, { stats }, 'Dashboard statistics retrieved');
+  });
 }
 
 module.exports = AuthController;

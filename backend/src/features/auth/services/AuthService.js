@@ -311,6 +311,40 @@ class AuthService {
       { where: { id: userId } }
     );
   }
+
+  /**
+   * Get dashboard statistics for user
+   * @param {number} userId - User ID
+   * @returns {object} Dashboard stats including templates, attachments, emails sent, and drafts
+   */
+  async getDashboardStats(userId) {
+    const Template = require('../../templates/models/Template');
+    const Attachment = require('../../attachments/models/Attachment');
+    
+    // Get all counts in parallel for better performance
+    const [templatesCount, attachmentsCount, userProfile] = await Promise.all([
+      Template.count({ 
+        where: { 
+          userId, 
+          isActive: true 
+        } 
+      }),
+      Attachment.count({ 
+        where: { 
+          userId, 
+          isActive: true 
+        } 
+      }),
+      this.getUserProfile(userId)
+    ]);
+
+    return {
+      templates: templatesCount,
+      attachments: attachmentsCount,
+      emailsSent: userProfile.emailsSent,
+      drafts: userProfile.draftsCreated
+    };
+  }
 }
 
 module.exports = AuthService;

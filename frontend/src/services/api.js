@@ -59,6 +59,7 @@ export const authAPI = {
   },
   googleLogin: (idToken) => api.post('/api/auth/google', { idToken }),
   getProfile: () => api.get('/api/auth/profile'),
+  getDashboardStats: () => api.get('/api/auth/dashboard-stats'),
   refreshToken: () => api.post('/api/auth/refresh'),
 };
 

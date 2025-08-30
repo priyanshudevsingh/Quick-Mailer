@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { templatesAPI, uploadAPI, authAPI } from '../services/api';
+import { useDashboardStats, useInvalidateDashboardStats } from '../hooks/useDashboardStats';
+import DashboardSkeleton from '../components/DashboardSkeleton';
 import toast from 'react-hot-toast';
 import { 
   Send, 
@@ -14,102 +15,36 @@ import {
 } from 'lucide-react';
 
 const SendEmail = () => {
-  const [stats, setStats] = useState({
+  const { data: stats, isLoading: loading, error } = useDashboardStats();
+  const invalidateDashboardStats = useInvalidateDashboardStats();
+
+  // Listen for legacy statsUpdate events from other components
+  useEffect(() => {
+    const handleStatsUpdate = () => {
+      invalidateDashboardStats();
+    };
+    
+    window.addEventListener('statsUpdate', handleStatsUpdate);
+    
+    return () => {
+      window.removeEventListener('statsUpdate', handleStatsUpdate);
+    };
+  }, [invalidateDashboardStats]);
+
+  // Show error toast only once when there's an error
+  if (error && !loading) {
+    toast.error('Failed to load dashboard data');
+  }
+
+  // Provide default values if stats is undefined
+  const safeStats = stats || {
     templates: 0,
     attachments: 0,
     emailsSent: 0,
     drafts: 0
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadStats();
-    
-    // Add event listener for window focus to refresh stats when user returns to dashboard
-    const handleWindowFocus = () => {
-      loadStats();
-    };
-    const handleStatsUpdate = () => {
-      loadStats();
-    };
-    
-    window.addEventListener('focus', handleWindowFocus);
-    window.addEventListener('statsUpdate', handleStatsUpdate);
-    
-    // Also refresh stats periodically when dashboard is visible
-    const interval = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        loadStats();
-      }
-    }, 10000); // Refresh every 10 seconds when visible
-    
-    return () => {
-      window.removeEventListener('focus', handleWindowFocus);
-      window.removeEventListener('statsUpdate', handleStatsUpdate);
-      clearInterval(interval);
-    };
-  }, []);
-
-  const loadStats = async () => {
-    try {
-      setLoading(true);
-      
-      // Load individual counts
-      let templateCount = 0;
-      let attachmentCount = 0;
-      let emailsSent = 0;
-      let draftsCreated = 0;
-      
-      try {
-        const templatesResponse = await templatesAPI.getAll();
-        const templatesData = templatesResponse.data?.data?.templates || templatesResponse.data?.templates || [];
-        templateCount = templatesData.length;
-      } catch (error) {
-        console.error('Failed to load templates:', error);
-      }
-      
-      try {
-        const attachmentsResponse = await uploadAPI.getAll();
-        const attachmentsData = attachmentsResponse.data?.data?.attachments || attachmentsResponse.data?.attachments || [];
-        attachmentCount = attachmentsData.length;
-      } catch (error) {
-        console.error('Failed to load attachments:', error);
-      }
-      
-      try {
-        const profileResponse = await authAPI.getProfile();
-        const profileData = profileResponse.data?.data || profileResponse.data;
-        const userProfile = profileData?.user || profileData;
-        emailsSent = userProfile?.emailsSent || 0;
-        draftsCreated = userProfile?.draftsCreated || 0;
-      } catch (error) {
-        console.error('Failed to load profile stats:', error);
-      }
-      
-      setStats({
-        templates: templateCount,
-        attachments: attachmentCount,
-        emailsSent: emailsSent,
-        drafts: draftsCreated
-      });
-      
-    } catch (error) {
-      console.error('Failed to load stats:', error);
-      toast.error('Failed to load dashboard data');
-      
-      // Set default values on complete failure
-      setStats({
-        templates: 0,
-        attachments: 0,
-        emailsSent: 0,
-        drafts: 0
-      });
-    } finally {
-      setLoading(false);
-    }
   };
 
-  const dashboardCards = [
+  const dashboardCards = useMemo(() => [
     {
       title: 'Craft Email',
       description: 'Create and send personalized emails using templates',
@@ -127,7 +62,7 @@ const SendEmail = () => {
       color: 'bg-green-500',
       bgColor: 'bg-green-50',
       textColor: 'text-green-700',
-      count: stats?.templates || 0
+      count: safeStats.templates
     },
     {
       title: 'Attachments',
@@ -137,7 +72,7 @@ const SendEmail = () => {
       color: 'bg-purple-500',
       bgColor: 'bg-purple-50',
       textColor: 'text-purple-700',
-      count: stats?.attachments || 0
+      count: safeStats.attachments
     },
     {
       title: 'Mass Email',
@@ -148,45 +83,41 @@ const SendEmail = () => {
       bgColor: 'bg-orange-50',
       textColor: 'text-orange-700'
     }
-  ];
+  ], [safeStats.templates, safeStats.attachments]);
 
-  const quickStats = [
+  const quickStats = useMemo(() => [
     {
       name: 'Templates',
-      value: stats?.templates || 0,
+      value: safeStats.templates,
       icon: FileText,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100'
     },
     {
       name: 'Attachments',
-      value: stats?.attachments || 0,
+      value: safeStats.attachments,
       icon: Paperclip,
       color: 'text-green-600',
       bgColor: 'bg-green-100'
     },
     {
       name: 'Emails Sent',
-      value: stats?.emailsSent || 0,
+      value: safeStats.emailsSent,
       icon: CheckCircle,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100'
     },
     {
       name: 'Drafts',
-      value: stats?.drafts || 0,
+      value: safeStats.drafts,
       icon: Clock,
       color: 'text-orange-600',
       bgColor: 'bg-orange-100'
     }
-  ];
+  ], [safeStats.templates, safeStats.attachments, safeStats.emailsSent, safeStats.drafts]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (

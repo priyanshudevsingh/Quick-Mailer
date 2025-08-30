@@ -5,12 +5,13 @@ import toast from 'react-hot-toast';
 import { FileText, Plus, Edit, Trash2, X, Bold, Italic, Underline, Clock, Type } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import RichTextEditor from '../components/RichTextEditor';
-import { refreshDashboardStats } from '../utils/statsUtils';
+import { useRefreshDashboardStats } from '../utils/statsUtils';
 
 const Templates = () => {
   const [templates, setTemplates] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
+  const refreshDashboardStats = useRefreshDashboardStats();
   const [loading, setLoading] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [placeholders, setPlaceholders] = useState([]);

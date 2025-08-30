@@ -3,12 +3,13 @@ import { uploadAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { Paperclip, Upload, Trash2, Download, FileText, Image, File, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { refreshDashboardStats } from '../utils/statsUtils';
+import { useRefreshDashboardStats } from '../utils/statsUtils';
 
 const Attachments = () => {
   const [attachments, setAttachments] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [loadingAttachments, setLoadingAttachments] = useState(true);
+  const refreshDashboardStats = useRefreshDashboardStats();
   const [deleteModal, setDeleteModal] = useState({ show: false, attachmentId: null, attachmentName: '' });
   const [dragActive, setDragActive] = useState(false);
   const [editingDescription, setEditingDescription] = useState(null);

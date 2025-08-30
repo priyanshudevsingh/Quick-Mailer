@@ -19,6 +19,7 @@ router.post('/google', authController.googleLogin);
 
 // Protected routes
 router.get('/profile', authenticateToken, authController.getProfile);
+router.get('/dashboard-stats', authenticateToken, authController.getDashboardStats);
 router.post('/refresh', authenticateToken, authController.refreshToken);
 router.post('/logout', authenticateToken, authController.logout);
 
