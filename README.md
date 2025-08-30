@@ -3,9 +3,11 @@
 A comprehensive, production-ready email management platform that transforms how you create, send, and manage professional email campaigns. Built with modern web technologies and featuring Gmail integration, rich text editing, mass email capabilities, and a mobile-responsive PWA design.
 
 ![Email Dashboard](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue)
+![Version](https://img.shields.io/badge/Version-2.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![PWA](https://img.shields.io/badge/PWA-Enabled-purple)
+![React Query](https://img.shields.io/badge/React%20Query-5.85.6-orange)
+![React](https://img.shields.io/badge/React-19.1.1-cyan)
 
 ## 🚀 Key Features
 
@@ -14,6 +16,7 @@ A comprehensive, production-ready email management platform that transforms how 
 - **JWT Authentication** - Stateless session management
 - **Gmail API Integration** - Full access to Gmail functionality
 - **Auto Token Refresh** - Seamless experience without re-login
+- **Profile Stats Tracking** - Automatic counting of emails sent and drafts created
 
 ### 📧 **Email Management**
 - **Rich Text Editor** - Bold, italic, underline, links with Gmail compatibility
@@ -29,30 +32,25 @@ A comprehensive, production-ready email management platform that transforms how 
 - **Template Downloads** - Generate Excel templates with placeholder columns
 - **Progress Tracking** - Real-time stats on success/failure rates
 - **Personalization** - Dynamic content per recipient
+- **Rate Limiting** - Built-in delays to avoid Gmail API limits
 
 ### 📎 **File Management**
 - **Multi-format Support** - PDF, DOC, images, videos, and more
 - **Drag & Drop Upload** - Intuitive file upload interface
 - **File Organization** - Manage and reuse attachments across campaigns
 - **Download & Preview** - Access uploaded files anytime
+- **S3 Integration** - Cloud storage with presigned URLs
+- **Hard Delete** - Complete removal from storage and database
 
 ### 📱 **Mobile & PWA**
 - **Fully Responsive** - Optimized for phones, tablets, and desktops
 - **Progressive Web App** - Install as native app on any device
-- **Touch Optimized** - Mobile-friendly interactions and gestures
-- **Offline Ready** - Service worker for caching and offline use
-
-### 📈 **Analytics & Tracking**
-- **Real-time Dashboard** - Live stats for templates, attachments, emails sent, drafts
-- **Auto-incrementing Counters** - Track email activity automatically
-- **Campaign Analytics** - Success rates for mass email campaigns
-- **User Activity** - Monitor template usage and file uploads
 
 ## 🛠️ Tech Stack & Architecture
 
 ### **Backend (Node.js + Express)**
 ```javascript
-├── 🚀 Node.js 18+ - High-performance JavaScript runtime
+├── 🚀 Node.js 20+ - High-performance JavaScript runtime
 ├── ⚡ Express.js - Fast, minimalist web framework
 ├── 🗃️ PostgreSQL - Robust relational database
 ├── 🔗 Sequelize ORM - Database modeling and migrations
@@ -61,28 +59,32 @@ A comprehensive, production-ready email management platform that transforms how 
 ├── 📤 Multer - Multi-part file upload handling
 ├── 📊 XLSX - Excel file parsing and generation
 ├── 🔧 dotenv - Environment configuration
+├── ☁️ AWS Lambda - Serverless deployment
+├── 🗄️ S3 Storage - Cloud file storage
 └── 🏗️ Clean Architecture - SOLID principles, DRY, KISS
 ```
 
 ### **Frontend (React + Vite)**
 ```javascript
-├── ⚛️ React 18+ - Modern UI library with hooks
-├── ⚡ Vite - Lightning-fast build tool and dev server
-├── 🎨 Tailwind CSS - Utility-first styling framework
-├── 🛣️ React Router v6 - Client-side routing
-├── 📡 Axios - Promise-based HTTP client
-├── 🎭 Lucide React - Beautiful, consistent icons
-├── 🍞 React Hot Toast - Elegant notifications
+├── ⚛️ React 19.1.1 - Latest React with hooks and concurrent features
+├── ⚡ Vite 7.1.2 - Lightning-fast build tool and dev server
+├── 🎨 Tailwind CSS 3.4.17 - Utility-first styling framework
+├── 🛣️ React Router v6.30.1 - Client-side routing
+├── 📡 Axios 1.11.0 - Promise-based HTTP client
+├── 🎭 Lucide React 0.540.0 - Beautiful, consistent icons
+├── 🍞 React Hot Toast 2.6.0 - Elegant notifications
 ├── 📝 Custom Rich Text Editor - Gmail-compatible formatting
 ├── 📱 PWA Ready - Service worker + manifest
-└── 📋 Context API - State management
+├── 🔄 React Query 5.85.6 - Server state management and caching
+├── 📋 Context API - Global auth state management
+└── 🎯 React Hook Form 7.62.0 - Form handling and validation
 ```
 
 ### **Database Schema**
 ```sql
-Users (id, googleId, email, name, picture, tokens, stats)
-Templates (id, userId, name, subject, body, placeholders)
-Attachments (id, userId, originalName, filename, path, size)
+Users (id, googleId, email, name, picture, accessToken, refreshToken, tokenExpiry, emailsSent, draftsCreated)
+Templates (id, userId, name, subject, body, placeholders, isActive)
+Attachments (id, userId, originalName, filename, mimetype, size, path, description, isActive)
 ```
 
 ### **Architecture Patterns**
@@ -92,16 +94,18 @@ Attachments (id, userId, originalName, filename, path, size)
 - **🛡️ Middleware Pattern** - Authentication, validation, error handling
 - **📡 RESTful APIs** - Standard HTTP methods and status codes
 - **🔐 JWT + OAuth** - Stateless authentication with Google
+- **☁️ Serverless First** - AWS Lambda deployment with serverless-http
 
 ## 📋 Prerequisites
 
 ```bash
-✅ Node.js v18+ (LTS recommended)
+✅ Node.js v20+ (LTS recommended)
 ✅ PostgreSQL 12+ (with database permissions)
 ✅ Google Cloud Console account (for OAuth & Gmail API)
 ✅ Gmail account (for testing email functionality)
 ✅ AWS Account (for serverless deployment)
 ✅ GitHub repository (for CI/CD)
+```
 
 ## 🚀 Quick Start Guide
 
@@ -119,7 +123,28 @@ cd backend && npm install
 cd ../frontend && npm install
 ```
 
-### **4️⃣ Google Cloud Console Setup**
+#### **2️⃣ Environment Setup**
+```bash
+# Backend (.env)
+cd backend
+cp env.example .env
+
+# Frontend (.env)
+cd ../frontend
+cp env.example .env
+```
+
+#### **3️⃣ Database Setup**
+```bash
+# Create PostgreSQL database
+createdb email_app
+
+# Run migrations (if using Sequelize CLI)
+cd backend
+npx sequelize-cli db:migrate
+```
+
+#### **4️⃣ Google Cloud Console Setup**
 ```bash
 # 1. Visit Google Cloud Console
 https://console.cloud.google.com/
@@ -145,7 +170,7 @@ https://console.cloud.google.com/
    - https://www.googleapis.com/auth/gmail.modify
 ```
 
-### **5️⃣ Launch Application**
+#### **5️⃣ Launch Application**
 ```bash
 # 🚀 Start Backend (Terminal 1)
 cd backend
@@ -158,7 +183,7 @@ npm run dev
 # ✅ App: http://localhost:3000
 ```
 
-### **6️⃣ First Login**
+#### **6️⃣ First Login**
 ```bash
 1. 🌐 Open http://localhost:3000
 2. 🔐 Click "Sign in with Google"
@@ -183,8 +208,6 @@ npm run build
 # Deploy to Vercel with environment variables
 ```
 
-**🚀 For detailed serverless setup, see [QUICK_START.md](QUICK_START.md)**
-
 ## 💡 User Guide & Workflows
 
 ### **🔐 Getting Started**
@@ -194,7 +217,7 @@ npm run build
 3. ✅ Grant permissions:
    - Read/write Gmail access
    - Profile information
-4. 📊 View your personalized dashboard
+4. 📊 View your personalized dashboard with real-time stats
 ```
 
 ### **📝 Creating Email Templates**
@@ -221,6 +244,7 @@ npm run build
    - Archives: ZIP, RAR
 ✅ Organize files with descriptions
 ✅ Reuse attachments across campaigns
+✅ Cloud storage with S3 integration
 ```
 
 ### **📧 Crafting Individual Emails**
@@ -265,30 +289,6 @@ npm run build
      💾 Save All as Drafts (review in Gmail first)
 ```
 
-## Key Features Explained
-
-### 💾 Draft Saving
-- Save emails as drafts in your Gmail account
-- Drafts appear in Gmail's Drafts folder
-- Continue editing later in Gmail
-
-### ⏰ Email Scheduling
-- Schedule emails for future delivery
-- Set specific date and time
-- Emails are sent automatically at scheduled time
-
-### ✨ Rich Text Formatting
-- Bold, italic, and underline text
-- Headers and lists
-- Links and clean formatting
-- Works with placeholders
-
-### 📊 Mass Email with Excel
-- Download Excel template with placeholder headers
-- Fill in recipient data (email + placeholder values)
-- Upload Excel file for mass sending
-- Personalized emails sent to each recipient
-
 ## 🔌 API Documentation
 
 ### **🔐 Authentication Endpoints**
@@ -297,6 +297,7 @@ POST   /api/auth/google/url              # Get Google OAuth URL
 GET    /api/auth/google/callback         # Handle OAuth callback  
 GET    /api/auth/profile                 # Get current user profile
 POST   /api/auth/refresh                 # Refresh expired tokens
+GET    /api/auth/dashboard-stats         # Get dashboard statistics
 ```
 
 ### **📝 Template Management**
@@ -314,7 +315,7 @@ GET    /api/attachments                  # List user attachments
 POST   /api/attachments                  # Upload new file
 GET    /api/attachments/:id/download     # Download file
 PUT    /api/attachments/:id              # Update file metadata
-DELETE /api/attachments/:id              # Soft delete file
+DELETE /api/attachments/:id              # Hard delete file
 ```
 
 ### **📧 Email Operations**
@@ -324,12 +325,6 @@ POST   /api/email/draft                  # Save as Gmail draft
 POST   /api/email/mass-email             # Send bulk emails
 POST   /api/email/mass-email/drafts      # Save bulk as drafts
 GET    /api/email/mass-email/template/:id # Download Excel template
-```
-
-### **📊 Analytics & Stats**
-```http
-GET    /api/stats/dashboard              # Get dashboard statistics
-GET    /api/stats/analytics              # Get detailed analytics
 ```
 
 ### **📋 Request/Response Examples**
@@ -397,14 +392,10 @@ Response:
 │   │   │   │   ├── services/TemplateService.js
 │   │   │   │   ├── models/Template.js
 │   │   │   │   └── routes/index.js
-│   │   │   ├── 📎 attachments/
-│   │   │   │   ├── controllers/AttachmentController.js
-│   │   │   │   ├── services/AttachmentService.js
-│   │   │   │   ├── models/Attachment.js
-│   │   │   │   └── routes/index.js
-│   │   │   └── 📊 statistics/
-│   │   │       ├── controllers/StatisticsController.js
-│   │   │       ├── services/StatisticsService.js
+│   │   │   └── 📎 attachments/
+│   │   │       ├── controllers/AttachmentController.js
+│   │   │       ├── services/AttachmentService.js
+│   │   │       ├── models/Attachment.js
 │   │   │       └── routes/index.js
 │   │   ├── 🔧 shared/                   # Shared utilities
 │   │   │   ├── database/index.js
@@ -419,17 +410,21 @@ Response:
 │   │   │   │   └── asyncHandler.js
 │   │   │   └── errors/AppError.js
 │   │   ├── ⚙️ config/index.js
-│   │   └── 🚀 server.js
+│   │   ├── 🚀 server.js
+│   │   └── ☁️ lambda.js                  # AWS Lambda handler
 │   ├── 📤 uploads/                      # File storage
 │   ├── 🔐 .env
-│   └── 📦 package.json
+│   ├── 📦 package.json
+│   ├── 🚀 serverless.yml                # Serverless configuration
+│   └── 🧪 jest.config.js                # Testing configuration
 │
 ├── 🎨 frontend/                          # React + Vite SPA
 │   ├── 📁 src/
 │   │   ├── 🧩 components/
 │   │   │   ├── GoogleLogin.jsx          # OAuth login component
 │   │   │   ├── Layout.jsx               # App layout with navigation
-│   │   │   └── RichTextEditor.jsx       # Gmail-compatible editor
+│   │   │   ├── RichTextEditor.jsx       # Gmail-compatible editor
+│   │   │   └── DashboardSkeleton.jsx    # Loading skeleton component
 │   │   ├── 📄 pages/
 │   │   │   ├── Login.jsx                # Login page
 │   │   │   ├── SendEmail.jsx            # Dashboard homepage
@@ -439,7 +434,12 @@ Response:
 │   │   │   ├── Attachments.jsx          # File management
 │   │   │   └── AuthCallback.jsx         # OAuth callback handler
 │   │   ├── 🌐 contexts/
-│   │   │   └── AuthContext.jsx          # Global auth state
+│   │   │   ├── AuthContext.jsx          # Global auth state
+│   │   │   └── QueryProvider.jsx        # React Query provider
+│   │   ├── 🪝 hooks/
+│   │   │   ├── useDashboardStats.js     # Dashboard stats hook
+│   │   │   ├── useAttachments.js        # Attachments management
+│   │   │   └── useTemplates.js          # Templates management
 │   │   ├── 🔌 services/
 │   │   │   └── api.js                   # API client (Axios)
 │   │   ├── 🛠️ utils/
@@ -450,10 +450,11 @@ Response:
 │   ├── 📱 public/
 │   │   ├── manifest.json                # PWA manifest
 │   │   ├── sw.js                        # Service worker
-│   │   └── icon-*.png                   # App icons
+│   │   └── icon-*.png                   # App icons (96x96, 180x180, 192x192, 512x512)
 │   ├── 📦 package.json
 │   ├── ⚙️ vite.config.js
 │   ├── 🎨 tailwind.config.js
+│   ├── 📄 vercel.json                   # Vercel deployment config
 │   └── 📄 index.html
 │
 ├── 📚 README.md                          # This file
@@ -476,15 +477,18 @@ Response:
 ├── ✅ JWT + OAuth 2.0 authentication
 ├── ✅ Multer for file uploads
 ├── ✅ Error handling middleware
-└── ✅ CORS and security middleware
+├── ✅ Serverless deployment with AWS Lambda
+└── ✅ S3 integration for file storage
 
 🎨 Frontend Patterns
-├── ✅ React 18 with hooks
-├── ✅ Context API for state management
+├── ✅ React 19 with hooks and concurrent features
+├── ✅ React Query for server state management
+├── ✅ Context API for global state
 ├── ✅ React Router for navigation
 ├── ✅ Axios for API communication
 ├── ✅ Tailwind CSS for styling
-└── ✅ PWA capabilities
+├── ✅ PWA capabilities with updated icons
+└── ✅ Skeleton loading for better UX
 ```
 
 ## 🚀 Deployment
@@ -520,43 +524,40 @@ VITE_API_URL=https://api.yourdomain.com
 VITE_GOOGLE_CLIENT_ID=your_prod_client_id
 ```
 
-### **🐳 Docker Deployment**
-```dockerfile
-# Dockerfile.backend
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY src/ ./src/
-EXPOSE 5000
-CMD ["npm", "start"]
+### **☁️ Serverless Deployment (Recommended)**
 
-# Dockerfile.frontend  
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
+#### **Backend (AWS Lambda)**
+```bash
+# 1. Install serverless framework
+npm install -g serverless
 
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
+# 2. Configure AWS credentials
+aws configure
+
+# 3. Deploy to Lambda
+cd backend
+npm run deploy
+
+# 4. Environment variables in serverless.yml
+DATABASE_URL: ${env:DATABASE_URL}
+JWT_SECRET: ${env:JWT_SECRET}
+GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID}
+GOOGLE_CLIENT_SECRET: ${env:GOOGLE_CLIENT_SECRET}
 ```
 
-## 📊 Performance & Scaling
+#### **Frontend (Vercel)**
+```bash
+# 1. Install Vercel CLI
+npm install -g vercel
 
-### **🔧 Optimizations**
-- **Caching**: Redis for session storage
-- **CDN**: Static assets via CloudFront
-- **Database**: Connection pooling, read replicas
-- **API**: Rate limiting, compression middleware
-- **Files**: S3/MinIO for attachment storage
+# 2. Deploy
+cd frontend
+vercel --prod
 
-### **📈 Monitoring**
-- **Logs**: Winston + ELK stack
-- **Metrics**: Prometheus + Grafana  
-- **Uptime**: Pingdom/StatusPage
-- **Errors**: Sentry integration
+# 3. Environment variables in Vercel dashboard
+VITE_API_URL=https://your-lambda-api-gateway.amazonaws.com
+VITE_GOOGLE_CLIENT_ID=your_prod_client_id
+```
 
 ## 🛡️ Security Features
 
@@ -569,6 +570,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 ✅ XSS protection via HTML sanitization
 ✅ Rate limiting on API endpoints
 ✅ HTTPS enforcement in production
+✅ S3 bucket policies and IAM roles
+✅ Lambda function security groups
 ```
 
 ### **📋 Coding Standards**
@@ -576,17 +579,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 - **Conventional Commits** for commit messages
 - **JSDoc** comments for functions
 - **Error handling** for all async operations
-
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support & Community
-
-- **🐛 Bug Reports**: [GitHub Issues](https://github.com/your-repo/issues)
-- **💡 Feature Requests**: [GitHub Discussions](https://github.com/your-repo/discussions)
-- **📧 Email**: support@yourdomain.com
-- **📖 Documentation**: [Wiki Pages](https://github.com/your-repo/wiki)
+- **Type safety** with proper validation
 
 ---
 

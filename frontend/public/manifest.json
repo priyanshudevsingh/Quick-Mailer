@@ -1,6 +1,6 @@
 {
   "name": "Quick Mailer",
-  "short_name": "Email App",
+  "short_name": "Quick Mailer",
   "description": "Manage your email campaigns, templates, and attachments with ease",
   "start_url": "/",
   "display": "standalone",
