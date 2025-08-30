@@ -140,9 +140,6 @@ const MassEmail = () => {
       setSelectedAttachments([]);
       setUploadedFile(null);
       setPreviewData([]);
-      
-      // Trigger stats update on dashboard
-      window.dispatchEvent(new Event('statsUpdate'));
     } catch (error) {
       console.error('Failed to send mass emails:', error);
       toast.error(error.response?.data?.error || 'Failed to send mass emails');
@@ -176,9 +173,6 @@ const MassEmail = () => {
       setSelectedAttachments([]);
       setUploadedFile(null);
       setPreviewData([]);
-      
-      // Trigger stats update on dashboard
-      window.dispatchEvent(new Event('statsUpdate'));
     } catch (error) {
       console.error('Failed to save mass emails as drafts:', error);
       toast.error(error.response?.data?.error || 'Failed to save mass emails as drafts');

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { templatesAPI, uploadAPI, statisticsAPI } from '../services/api';
+import { templatesAPI, uploadAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   Send, 
@@ -25,21 +25,14 @@ const SendEmail = () => {
   useEffect(() => {
     loadStats();
     
-    // Add event listener for storage changes to refresh stats when data changes
-    const handleStorageChange = () => {
-      loadStats();
-    };
-    
     // Add event listener for window focus to refresh stats when user returns to dashboard
     const handleWindowFocus = () => {
       loadStats();
     };
     
-    window.addEventListener('statsUpdate', handleStorageChange);
     window.addEventListener('focus', handleWindowFocus);
     
     return () => {
-      window.removeEventListener('statsUpdate', handleStorageChange);
       window.removeEventListener('focus', handleWindowFocus);
     };
   }, []);
@@ -48,23 +41,7 @@ const SendEmail = () => {
     try {
       setLoading(true);
       
-      // Try to use the stats API first (now includes real email counters)
-      try {
-        const statsResponse = await statisticsAPI.getStats();
-        
-        if (statsResponse.data.success) {
-          const backendStats = statsResponse.data.data?.stats || statsResponse.data.data || statsResponse.data.stats;
-
-          if (backendStats) {
-            setStats(backendStats);
-            return; // Success, exit early
-          }
-        }
-      } catch (error) {
-        console.error('Stats API failed, falling back to individual APIs:', error);
-      }
-      
-      // Fallback: Load individual counts if stats API fails
+      // Load individual counts
       let templateCount = 0;
       let attachmentCount = 0;
       
@@ -87,8 +64,8 @@ const SendEmail = () => {
       setStats({
         templates: templateCount,
         attachments: attachmentCount,
-        emailsSent: 0, // Would be 0 in fallback case
-        drafts: 0      // Would be 0 in fallback case
+        emailsSent: 0,
+        drafts: 0
       });
       
     } catch (error) {

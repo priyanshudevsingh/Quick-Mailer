@@ -133,12 +133,6 @@ export const emailAPI = {
   deleteDraft: (id) => api.delete(`/api/email/drafts/${id}`),
 };
 
-// Statistics API
-export const statisticsAPI = {
-  getStats: () => api.get('/api/stats'),
-  getEmailStats: () => api.get('/api/stats/email'),
-  getTemplateStats: () => api.get('/api/stats/templates'),
-  getAttachmentStats: () => api.get('/api/stats/attachments'),
-};
+
 
 export default api;
