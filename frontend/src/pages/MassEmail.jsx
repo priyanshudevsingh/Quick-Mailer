@@ -164,7 +164,13 @@ const MassEmail = () => {
         // Show detailed results - backend returns successCount/failureCount, not summary
         const result = response.data.data || response.data;
         if (result.failureCount > 0) {
-          toast.warn(`${result.successCount} drafts created, ${result.failureCount} failed`);
+          toast(`${result.successCount} drafts created, ${result.failureCount} failed`, {
+            icon: '⚠️',
+            style: {
+              background: '#f59e0b',
+              color: '#ffffff',
+            },
+          });
         }
       }
       
