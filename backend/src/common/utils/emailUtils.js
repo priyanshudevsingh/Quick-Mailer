@@ -44,19 +44,32 @@ const cleanHtmlForEmail = (html) => {
     .replace(/style="[^"]*--[^"]*"/g, '')
     .replace(/style="[^"]*var\([^"]*"/g, '');
 
-  // Second pass: Fix malformed or nested links - COMPLETE CLEANUP
-  // Remove ALL <a> tags first to start fresh
-  cleaned = cleaned.replace(/<a[^>]*>.*?<\/a>/gi, function(match) {
-    // Extract just the text content from any link
-    return match.replace(/<a[^>]*>(.*?)<\/a>/gi, '$1');
+  // Second pass: Fix and preserve existing links
+  // First, clean up existing links to ensure they're Gmail-compatible
+  cleaned = cleaned.replace(/<a\s+[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, function(match, href, text) {
+    // Clean the href and text
+    const cleanHref = href.trim();
+    const cleanText = text.trim();
+    
+    // Only process if we have a valid href and text
+    if (cleanHref && cleanText) {
+      // Ensure URL has protocol
+      let finalUrl = cleanHref;
+      if (!finalUrl.match(/^https?:\/\//)) {
+        finalUrl = 'https://' + finalUrl;
+      }
+      
+      // Return Gmail-compatible link
+      return `<a href="${finalUrl}" style="color: #1155cc; text-decoration: none;">${cleanText}</a>`;
+    }
+    
+    // If link is malformed, return just the text
+    return cleanText;
   });
   
-  // Remove any remaining broken link fragments
-  cleaned = cleaned.replace(/<\/?a[^>]*>/gi, '');
-  
-  // Third pass: Convert URLs to proper Gmail-compatible links
-  // Convert URLs in text to clickable links (after removing all existing broken links)
-  cleaned = cleaned.replace(/(https?:\/\/[^\s<>"]+)/gi, function(url) {
+  // Third pass: Convert remaining plain URLs to clickable links
+  // Only convert URLs that are not already inside <a> tags
+  cleaned = cleaned.replace(/(?<!<a[^>]*>)(https?:\/\/[^\s<>"]+)(?![^<]*<\/a>)/gi, function(url) {
     return `<a href="${url}" style="color: #1155cc; text-decoration: none;">${url}</a>`;
   });
   

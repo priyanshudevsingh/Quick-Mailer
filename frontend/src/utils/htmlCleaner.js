@@ -81,7 +81,26 @@ export const cleanHtmlForEmail = (html) => {
   cleanedHtml = cleanedHtml.replace(/style="[^"]*--tw-[^"]*"/gi, '');
 
   // Ensure links are properly formatted and clickable - preserve existing styling
-  cleanedHtml = cleanedHtml.replace(/<a\s+[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: #1a73e8; text-decoration: underline;">$2</a>');
+  cleanedHtml = cleanedHtml.replace(/<a\s+[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, function(match, href, text) {
+    // Clean the href and text
+    const cleanHref = href.trim();
+    const cleanText = text.trim();
+    
+    // Only process if we have a valid href and text
+    if (cleanHref && cleanText) {
+      // Ensure URL has protocol
+      let finalUrl = cleanHref;
+      if (!finalUrl.match(/^https?:\/\//)) {
+        finalUrl = 'https://' + finalUrl;
+      }
+      
+      // Return properly formatted link
+      return `<a href="${finalUrl}" target="_blank" rel="noopener noreferrer" style="color: #1a73e8; text-decoration: underline;">${cleanText}</a>`;
+    }
+    
+    // If link is malformed, return just the text
+    return cleanText;
+  });
 
   return cleanedHtml.trim();
 };
